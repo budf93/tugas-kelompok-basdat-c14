@@ -25,14 +25,6 @@
         </table>
     </form>
 
-    {% if messages %}
-        <ul>
-            {% for message in messages %}
-                <li>{{ message }}</li>
-            {% endfor %}
-        </ul>
-    {% endif %}     
-        
-    Don't have an account yet? <a href="">Register Now</a>
+    Don't have an account yet? <a href="{% url 'main:show_register' %}">Register Now</a>
 
 {% endblock content %}
