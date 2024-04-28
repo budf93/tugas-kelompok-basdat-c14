@@ -17,3 +17,13 @@ def show_register(request):
 
     return render(request, "register.html", context)
 
+def daftar_unduhan(request):
+    context = {}
+
+    return render(request, "daftar_unduhan.html", context)
+
+def daftar_favorit(request):
+    context = {}
+
+    return render(request, "daftar_favorit.html", context)
+
