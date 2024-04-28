@@ -2,34 +2,58 @@
 
 {% block content %}
 <h1 class="text-center">Daftar Kontributor</h1>
-<p></p>
-<table class="table table-bordered">
-  <thead>
-    <tr>
-      <th scope="col">#</th>
-      <th scope="col">First</th>
-      <th scope="col">Last</th>
-      <th scope="col">Handle</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th scope="row">1</th>
-      <td>Mark</td>
-      <td>Otto</td>
-      <td>@mdo</td>
-    </tr>
-    <tr>
-      <th scope="row">2</th>
-      <td>Jacob</td>
-      <td>Thornton</td>
-      <td>@fat</td>
-    </tr>
-    <tr>
-      <th scope="row">3</th>
-      <td>Larry the Bird</td>
-      <td>@twitter</td>
-    </tr>
-  </tbody>
-</table>
+
+<p></p><p></p><p></p>
+<div class="container">
+  <p>Cari kontributor berdasarkan tipe:</p>
+    <!-- dropdown -->
+    <div class="dropdown mt-3">
+      <button class="btn btn-secondary dropdown-toggle" type="button" id="book-dropdown" data-bs-toggle="dropdown">
+        Tipe Kontributor
+      </button>
+      <ul class="dropdown-menu" aria-labelledby="book-dropdown">
+        <li><a class="dropdown-item" href="#">Become a React Superhero</a></li>
+        <li><a class="dropdown-item" href="#">Conquering Vue.js</a></li>
+        <li><a class="dropdown-item" href="#">Levelling up Your Next.js</a></li>
+      </ul>
+    </div>
+  <p></p><p></p>
+  <table class="table table-center">
+    <thead class="border">
+      <tr>
+        <th scope="col" class="border">Nama</th>
+        <th scope="col" class="border">Tipe</th>
+        <th scope="col" class="border">Jenis Kelamin</th>
+        <th scope="col" class="border">Kewarganegaraan</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <th scope="row" class="border">1</th>
+        <td class="border">Mark</td>
+        <td class="border">Otto</td>
+        <td class="border">@mdo</td>
+      </tr>
+      <tr>
+        <th scope="row" class="border">2</th>
+        <td class="border">Jacob</td>
+        <td class="border">Thornton</td>
+        <td class="border">@fat</td>
+      </tr>
+      <tr>
+        <th scope="row" class="border">3</th>
+        <td class="border">Larry the Bird</td>
+        <td class="border">@twitter</td>
+        <td class="border"></td>
+      </tr>
+      <tr>
+        <th scope="row" class="border">4</th>
+        <td class="border">Larry the Bird</td>
+        <td class="border">@twitter</td>
+        <td class="border"></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
 {% endblock content %}

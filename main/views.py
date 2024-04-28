@@ -18,3 +18,9 @@ def langganan(request):
     }
 
     return render(request, "langganan.html", context)
+
+def halaman_beli(request):
+    context = {
+    }
+
+    return render(request, "halaman_beli.html", context)
