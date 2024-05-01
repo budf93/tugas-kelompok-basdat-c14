@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block meta %}
+    <title>Register</title>
+{% endblock meta %}
+
+{% block content %}  
+
+<div class = "login">
+    
+    <h1>Register</h1>  
+
+        <form method="POST" >  
+            {% csrf_token %}  
+            <table>
+                <tr>
+                    <td>Username: </td>
+                    <td style="padding-bottom: 10px;"><input type="text" name="username" placeholder="Username" class="form-control"></td>
+                </tr>
+                        
+                <tr>
+                    <td>Password: </td>
+                    <td style="padding-bottom: 10px;"><input type="password" name="password" placeholder="Password" class="form-control"></td>
+                </tr>
+
+                <tr>
+                    <td>Negara Asal: </td>
+                    <td style="padding-bottom: 10px;"><input type="negara-asal" name="negara-asal" placeholder="Negara Asal" class="form-control"></td>
+                </tr>
+    
+                <tr>
+                    <td></td>
+                    <td><input class="btn btn-info" type="submit" value="Daftar"></td>
+                </tr>
+            </table> 
+        </form>
+
+</div>  
+
+<style>
+    /* Add spacing between table rows */
+    table tr {
+        margin-bottom: 10px; /* Adjust the margin-bottom value as needed */
+    }
+</style>
+
+{% endblock content %}
