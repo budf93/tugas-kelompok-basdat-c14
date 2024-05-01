@@ -1,0 +1,164 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block meta %}
+<title>Daftar Tayangan</title>
+{% endblock meta %}
+
+{% block content %}
+
+<body>
+    <div class="container">
+        <h1>DAFTAR TAYANGAN</h1>
+        <input type="text" id="search" placeholder="Pencarian Tayangan berdasarkan judul" oninput="toggleTables()">
+        <div id="defaultTables">
+            <h2>10 Tayangan Terbaik Minggu ini</h2>
+            <input type="radio" id="global" name="top10" checked>
+            <label for="global">Top 10 Global</label>
+            <input type="radio" id="userCountry" name="top10">
+            <label for="userCountry">Top 10 Negara Pengguna</label>
+            <table>
+                <tr>
+                    <th>Peringkat</th>
+                    <th>Judul</th>
+                    <th>Sinopsis Trailer</th>
+                    <th>URL Trailer</th>
+                    <th>Tanggal Rilis Trailer</th>
+                    <th>Total View 7 Hari Terakhir</th>
+                    <th>Tayangan</th>
+                </tr>
+                <!-- Repeat this row for each item in the list -->
+                <tr>
+                    <td>1</td>
+                    <td>data</td>
+                    <td>data</td>
+                    <td>data</td>
+                    <td>data</td>
+                    <td>data</td>
+                    <td><a href="{% url 'main:show_tayangan' %}" class="btn">Lihat Tayangan</a></td>
+                </tr>
+            </table>
+            <h2>Film</h2>
+            <table>
+                <tr>
+                    <th>Judul</th>
+                    <th>Sinopsis Trailer</th>
+                    <th>URL Trailer</th>
+                    <th>Tanggal Rilis Trailer</th>
+                    <th>Tayangan</th>
+                </tr>
+                <!-- Repeat this row for each item in the list -->
+                <tr>
+                    <td>data</td>
+                    <td>data</td>
+                    <td>data</td>
+                    <td>data</td>
+                    <td><a href="{% url 'main:show_tayangan' %}" class="btn">Lihat Tayangan</a></td>
+                </tr>
+            </table>
+            <h2>Series</h2>
+            <!-- Repeat this section for each series -->
+            <table>
+                <tr>
+                    <th>Judul</th>
+                    <th>Sinopsis Trailer</th>
+                    <th>URL Trailer</th>
+                    <th>Tanggal Rilis Trailer</th>
+                    <th>Tayangan</th>
+                </tr>
+                <!-- Repeat this row for each item in the list -->
+                <tr>
+                    <td>data</td>
+                    <td>data</td>
+                    <td>data</td>
+                    <td>data</td>
+                    <td><a href="{% url 'main:show_tayangan' %}" class="btn">Lihat Tayangan</a></td>
+                </tr>
+            </table>
+        </div>
+        <div id="searchResults" style="display: none;">
+            <h2>HASIL PENCARIAN</h2>
+            <!-- Repeat this section for each search result -->
+            <table>
+                <tr>
+                    <th>Judul</th>
+                    <th>Sinopsis Trailer</th>
+                    <th>URL Trailer</th>
+                    <th>Tanggal Rilis Trailer</th>
+                    <th>Tayangan</th>
+                </tr>
+                <!-- Repeat this row for each item in the list -->
+                <tr>
+                    <td>data</td>
+                    <td>data</td>
+                    <td>data</td>
+                    <td>data</td>
+                    <td><a href="{% url 'main:show_tayangan' %}" class="btn">Lihat Tayangan</a></td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</body>
+
+<style>
+    label {
+        margin-right: 10px;
+        /* Adjust the margin-right value as needed */
+    }
+
+    /* Add spacing between table rows */
+    table tr {
+        margin-bottom: 10px;
+        /* Adjust the margin-bottom value as needed */
+        border-collapse: collapse;
+    }
+
+    table {
+        margin: auto;
+    }
+
+    th,
+    td {
+        text-align: center;
+        /* Center the text in the table headers and cells */
+        padding: 10px;
+        /* Add some padding around the text */
+        border: 1px solid black;
+    }
+
+    body {
+        text-align: center;
+    }
+
+    .btn {
+        display: inline-block;
+        padding: 10px 20px;
+        color: #fff;
+        background-color: #007bff;
+        border: none;
+        border-radius: 5px;
+        text-decoration: none;
+        text-align: center;
+        cursor: pointer;
+    }
+</style>
+
+<script>
+    function toggleTables() {
+        var searchBox = document.getElementById('search');
+        var defaultTables = document.getElementById('defaultTables');
+        var searchResults = document.getElementById('searchResults');
+
+        if (searchBox.value) {
+            // If the search box is not empty, hide the default tables and show the search results
+            defaultTables.style.display = 'none';
+            searchResults.style.display = 'block';
+        } else {
+            // If the search box is empty, show the default tables and hide the search results
+            defaultTables.style.display = 'block';
+            searchResults.style.display = 'none';
+        }
+    }
+</script>
+
+{% endblock content %}

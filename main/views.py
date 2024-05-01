@@ -17,3 +17,26 @@ def show_register(request):
 
     return render(request, "register.html", context)
 
+def show_trailer(request):
+
+    context = {
+        'user': request.user,
+    }
+
+    return render(request, 'daftar_tayangan.html', context)
+
+def show_tayangan(request):
+    
+    context = {
+        'user': request.user,
+    }
+
+    return render(request, 'halaman_tayangan.html', context)
+
+def show_episode(request):
+    
+    context = {
+        'user': request.user,
+    }
+
+    return render(request, 'halaman_episode.html', context)
