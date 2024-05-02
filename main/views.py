@@ -1,11 +1,6 @@
 from django.shortcuts import render
 
 # Create your views here.
-def show_main(request):
-    context = {
-    }
-
-    return render(request, "home.html", context)
 
 def daftar_kontributor(request):
     context = {
@@ -63,7 +58,7 @@ def show_tayangan(request):
     context = {
         'user': request.user,
     }
-
+    
     return render(request, 'halaman_tayangan.html', context)
 
 def show_episode(request):
