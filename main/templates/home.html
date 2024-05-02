@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+
+<div style="margin: auto; width: 20vw; padding-top: 30vh;"> 
+
+    <h1>PacilFlix - C14</h1>
+        <table>
+
+            <tr>
+                <td>
+                <button><a style="text-decoration: none;" href="{% url 'main:show_login' %}">Login</a>
+                </button>
+                </td>
+            </tr>   
+
+            <tr>
+                <td>
+                    <button><a style="text-decoration: none;" href="{% url 'main:show_register' %}">Register</a>
+                    </button>
+                </td>
+            </tr>
+
+        </table>
+
+{% endblock content %}
