@@ -1,0 +1,127 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block meta %}
+<title>Halaman Tayangan</title>
+{% endblock meta %}
+
+{% block content %}
+
+<body>
+
+    <h1>HALAMAN FILM</h1>
+    <h2>Judul: data</h2>
+    <!-- Uncomment jika series-->
+    <h4>Episode:</h2>
+    <ul>
+        <li><a href="{% url 'main:show_episode' %}">Episode 1</a></li>
+        <li><a href="{% url 'main:show_episode' %}">Episode 2</a></li>
+        <li><a href="{% url 'main:show_episode' %}">Episode 3</a></li>
+    </ul> 
+
+    <button>Tonton</button>
+    <button data-bs-toggle="modal" data-bs-target="#unduhModal">Unduh Tayangan</button>
+
+    <button data-bs-toggle="modal" data-bs-target="#favoritModal">Favorit Tayangan</button>
+
+    <p>Total View: data</p>
+    <p>Rating Rata-Rata: data</p>
+    <p>Sinopsis: data</p>
+    <p>Durasi Film: data</p>
+    <p>Tanggal Rilis Film: data</p>
+    <p>URL Film: data</p>
+
+    <h3>Genre:</h3>
+    <ul>
+        <li>nama_genre_1</li>
+        <li>nama_genre_2</li>
+        <li>nama_genre_3</li>
+    </ul>
+
+    <h3>Asal Negara: data</h3>
+
+    <h3>Pemain:</h3>
+    <ul>
+        <li>nama_pemain_1</li>
+        <li>nama_pemain_2</li>
+        <li>nama_pemain_3</li>
+    </ul>
+
+    <h3>Penulis Skenario:</h3>
+    <ul>
+        <li>nama_penulis_skenario_1</li>
+        <li>nama_penulis_skenario_2</li>
+        <li>nama_penulis_skenario_3</li>
+    </ul>
+
+    <h3>Sutradara: data</h3>
+
+    <h3>Bagian Ulasan</h3>
+
+    <form action="" method="post">
+        {% csrf_token %}
+        <textarea name="review_text" placeholder="Input untuk deskripsi ulasan"></textarea>
+        <input type="number" name="rating" min="1" max="5" placeholder="rating yang diberikan">
+        <button type="submit">Submit</button>
+    </form>
+    
+    <h4>Daftar Ulasan:</h4>
+    <ul>
+        <li>
+            <p>Username: data</p>
+            <p>Deskripsi: data</p>
+            <p>Rating: data</p>
+        </li>
+        <li>
+            <p>Username: data</p>
+            <p>Deskripsi: data</p>
+            <p>Rating: data</p>
+        </li>
+    </ul>
+
+    <div class="modal fade" id="unduhModal" tabindex="-1" role="dialog" aria-labelledby="unduhModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="unduhModalLabel">SUKSES MENAMBAHKAN TAYANGAN KE DAFTAR UNDUHAN
+                        </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    Selamat! Anda telah berhasil mengunduh [Judul Tayangan] dan akan
+                    berlaku hingga [current time + 7 hari]. Cek informasi selengkapnya
+                    pada halaman daftar unduhan.
+                </div>
+                <div class="modal-footer">
+                    <a class="btn btn-primary">Daftar Unduhan</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="favoritModal" tabindex="-1" role="dialog" aria-labelledby="favoritModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="favoritModalLabel">TAMBAH KE DAFTAR FAVORIT MODAL</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <span>Judul Daftar Favorit: </span>
+                    <select id="favoriteDropdown">
+                        <option value="">Pilih Daftar Favorit</option>
+                        <option value="favorit1">Favorit 1</option>
+                        <option value="favorit2">Favorit 2</option>
+                        <option value="favorit3">Favorit 3</option>
+                    </select>
+                </div>
+                <div class="modal-footer">
+                    <a class="btn btn-success">Tambah</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+</body>
+
+{% endblock content %}
