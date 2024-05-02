@@ -20,9 +20,9 @@
     </ul> 
 
     <button>Tonton</button>
-    <button>Unduh Tayangan</button>
+    <button data-bs-toggle="modal" data-bs-target="#unduhModal">Unduh Tayangan</button>
 
-    <button>Favorit Tayangan</button>
+    <button data-bs-toggle="modal" data-bs-target="#favoritModal">Favorit Tayangan</button>
 
     <p>Total View: data</p>
     <p>Rating Rata-Rata: data</p>
@@ -79,6 +79,49 @@
         </li>
     </ul>
 
+    <div class="modal fade" id="unduhModal" tabindex="-1" role="dialog" aria-labelledby="unduhModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="unduhModalLabel">SUKSES MENAMBAHKAN TAYANGAN KE DAFTAR UNDUHAN
+                        </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    Selamat! Anda telah berhasil mengunduh [Judul Tayangan] dan akan
+                    berlaku hingga [current time + 7 hari]. Cek informasi selengkapnya
+                    pada halaman daftar unduhan.
+                </div>
+                <div class="modal-footer">
+                    <a class="btn btn-primary">Daftar Unduhan</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="favoritModal" tabindex="-1" role="dialog" aria-labelledby="favoritModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="favoritModalLabel">TAMBAH KE DAFTAR FAVORIT MODAL</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <span>Judul Daftar Favorit: </span>
+                    <select id="favoriteDropdown">
+                        <option value="">Pilih Daftar Favorit</option>
+                        <option value="favorit1">Favorit 1</option>
+                        <option value="favorit2">Favorit 2</option>
+                        <option value="favorit3">Favorit 3</option>
+                    </select>
+                </div>
+                <div class="modal-footer">
+                    <a class="btn btn-success">Tambah</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
 </body>
 
 {% endblock content %}
