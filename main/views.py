@@ -58,7 +58,7 @@ def show_tayangan(request):
     context = {
         'user': request.user,
     }
-
+    
     return render(request, 'halaman_tayangan.html', context)
 
 def show_episode(request):
