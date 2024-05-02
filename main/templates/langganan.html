@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1 class="text-center">Halaman Kelola Langganan</h1>
+<div class="container">
+    <p>Paket Langganan Aktif Anda:</p>
+    <p></p><p></p>
+    <table class="table table-center">
+        <thead class="border">
+        <tr>
+            <th scope="col" class="border">Nama</th>
+            <th scope="col" class="border">Harga</th>
+            <th scope="col" class="border">Resolusi Layar</th>
+            <th scope="col" class="border">Dukungan Perangkat</th>
+            <th scope="col" class="border">Tanggal Dimulai</th>
+            <th scope="col" class="border">Tanggal Akhir</th>
+        </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td class="border">Udin</td>
+                <td class="border">Rp. 500000</td>
+                <td class="border">3840x2160</td>
+                <td class="border">iOS, Android</td>
+                <td class="border">15-04-2024</td>
+                <td class="border">15-06-2024</td>
+            </tr>
+            <tr>
+                <td class="border">Asep</td>
+                <td class="border">Rp. 500000</td>
+                <td class="border">3840x2160</td>
+                <td class="border">iOS, Android</td>
+                <td class="border">15-04-2024</td>
+                <td class="border">15-06-2024</td>
+            </tr>
+        </tbody>
+    </table>
+    <p>Pilih Paket Lain:</p>
+    <p></p><p></p>
+    <table class="table table-center">
+        <thead class="border">
+        <tr>
+            <th scope="col" class="border">Nama</th>
+            <th scope="col" class="border">Harga</th>
+            <th scope="col" class="border">Resolusi Layar</th>
+            <th scope="col" class="border">Dukungan Perangkat</th>
+            <th scope="col" class="border">Beli</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td class="border">Asep</td>
+            <td class="border">100000</td>
+            <td class="border">1280x720</td>
+            <td class="border">Android</td>
+            <td class="border">
+                <a class="btn btn-primary" href="#" role="button">Beli</a>
+            </td>
+        </tr>
+        <tr>
+            <td class="border">Agus</td>
+            <td class="border">200000</td>
+            <td class="border">1280x720</td>
+            <td class="border">Android</td>
+            <td class="border">
+                <a class="btn btn-primary" href="#" role="button">Beli</a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+    <p>Riwayat Transaksi:</p>
+    <p></p><p></p>
+    <table class="table table-center">
+        <thead class="border">
+        <tr>
+            <th scope="col" class="border">Nama Paket</th>
+            <th scope="col" class="border">Tanggal Dimulai</th>
+            <th scope="col" class="border">Tanggal Akhir</th>
+            <th scope="col" class="border">Metode Pembayaran</th>
+            <th scope="col" class="border">Tanggal Pembayaran</th>
+            <th scope="col" class="border">Total Pembayaran</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td class="border">Indihome Paket Phoenix</td>
+            <td class="border">15-04-2024</td>
+            <td class="border">15-04-2026</td>
+            <td class="border">Bitcoin</td>
+            <td class="border">14-04-2024</td>
+            <td class="border">200000</td>
+        </tr>
+        <tr>
+            <td class="border">Indihome Paket Gamer</td>
+            <td class="border">15-04-2024</td>
+            <td class="border">15-04-2026</td>
+            <td class="border">Bitcoin</td>
+            <td class="border">14-04-2024</td>
+            <td class="border">200000</td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+{% endblock content %}

@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1 class="text-center">Halaman Beli</h1>
+
+<div class="container">
+    <p>Informasi Paket yang ingin dibeli:</p>
+    <p></p><p></p>
+    <table class="table table-center">
+        <thead class="border">
+        <tr>
+            <th scope="col" class="border">Nama</th>
+            <th scope="col" class="border">Harga</th>
+            <th scope="col" class="border">Resolusi Layar</th>
+            <th scope="col" class="border">Dukungan Perangkat</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td class="border">Udin</td>
+            <td class="border">Rp. 500000</td>
+            <td class="border">3840x2160</td>
+            <td class="border">iOS, Android</td>
+        </tr>
+        <tr>
+            <td class="border">Asep</td>
+            <td class="border">Rp. 500000</td>
+            <td class="border">3840x2160</td>
+            <td class="border">iOS, Android</td>
+        </tr>
+        </tbody>
+    </table>
+    <p>Pilih metode pembayaran:</p>
+    <!-- dropdown -->
+    <div class="dropdown mt-3">
+    <button class="btn btn-secondary dropdown-toggle" type="button" id="metode-pembayaran-dropdown" data-bs-toggle="dropdown">
+        Pilih Metode Pembayaran:
+    </button>
+    <ul class="dropdown-menu" aria-labelledby="metode-pembayaran-dropdown">
+        <li><a class="dropdown-item" href="#">Transfer Bank</a></li>
+        <li><a class="dropdown-item" href="#">Kartu Kredit</a></li>
+        <li><a class="dropdown-item" href="#">E-Wallet</a></li>
+    </ul>
+    <div class="col-md-12 text-center">
+        <button type="button" class="btn btn-primary">Bayar</button>
+    </div>
+    </div>
+</div>
+
+{% endblock content %}
