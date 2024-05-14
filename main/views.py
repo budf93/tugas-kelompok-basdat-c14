@@ -22,7 +22,9 @@ def halaman_beli(request):
 
 def show_home(request):
     context = {}
-
+    conn.cursor().execute("Select * FROM PENGGUNA")
+    print(conn.cursor().fetchall)
+    print()
     return render(request, "home.html", context)
 
 def show_login(request):
