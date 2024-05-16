@@ -11,7 +11,7 @@
     <!-- Uncomment sesuai kebutuhan-->
     <h1>HALAMAN SERIES</h1>
     <!-- <h1>HALAMAN FILM</h1> -->
-    <h2>Judul: data</h2>
+    <h2>Judul: {{ tayangan.0.0 }}</h2>
     <!-- Uncomment jika series-->
     <h4>Episode:</h2>
     <ul>
@@ -21,7 +21,11 @@
     </ul> 
 
     <button>Tonton</button>
-    <button data-bs-toggle="modal" data-bs-target="#unduhModal">Unduh Tayangan</button>
+    <form method="POST" action="{% url 'main:tambah_unduhan' %}">
+        {% csrf_token %}
+        <input type="hidden" name="judul" value="{{ tayangan.0.0 }}">
+        <button type="submit" >Unduh Tayangan</button>
+    </form>
 
     <button data-bs-toggle="modal" data-bs-target="#favoritModal">Favorit Tayangan</button>
 
@@ -107,22 +111,53 @@
                     <h5 class="modal-title" id="favoritModalLabel">TAMBAH KE DAFTAR FAVORIT MODAL</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body">
-                    <span>Judul Daftar Favorit: </span>
-                    <select id="favoriteDropdown">
-                        <option value="">Pilih Daftar Favorit</option>
-                        <option value="favorit1">Favorit 1</option>
-                        <option value="favorit2">Favorit 2</option>
-                        <option value="favorit3">Favorit 3</option>
-                    </select>
-                </div>
-                <div class="modal-footer">
-                    <a class="btn btn-success">Tambah</a>
-                </div>
+                <form method="POST" action="{% url 'main:add_to_favorit' %}">
+                    {% csrf_token %}
+                    <div class="modal-body">
+                        <span>Judul Daftar Favorit:</span>
+                        <input type="hidden" name="judul_tayangan" value="{{ tayangan.0.0 }}">
+                        <select id="favoriteDropdown" name="daftar_favorit">
+                            <option value="">Pilih Daftar Favorit</option>
+                            {% for favorit in daftar_favorit %}
+                                <option value="{{ favorit.0 }}">{{ favorit.0 }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit">Tambah</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
-    
 </body>
+{% if messages %}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    var myModal = new bootstrap.Modal(document.getElementById('downloadSuccessModal'));
+    myModal.show();
+  });
+</script>
+{% endif %}
+
+<div class="modal fade" id="downloadSuccessModal" tabindex="-1" role="dialog" aria-labelledby="modalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalLabel">SUKSES MENAMBAHKAN TAYANGAN KE DAFTAR UNDUHAN</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                {% for message in messages %}
+                    <p>{{ message }}</p>
+                {% endfor %}
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <a type="button" class="btn btn-primary" href="{% url 'main:daftar_unduhan' %}">Daftar Unduhan</a>
+            </div>
+        </div>
+    </div>
+</div>
 
 {% endblock content %}
