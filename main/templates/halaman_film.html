@@ -12,12 +12,12 @@
     <h2>Judul: {{ judul }}</h2>
 
     <!-- TODO IMPLEMENT -->
-    <form id="watchForm" action="{% url 'watch' %}" method="post">
+    <!-- <form id="watchForm" action="" method="post">
         {% csrf_token %}
         <label for="progress">Progress:</label>
         <input type="range" id="progress" name="progress" min="0" max="100">
         <button id="watchButton" type="button">Tonton</button>
-    </form>
+    </form> -->
     
     <button data-bs-toggle="modal" data-bs-target="#unduhModal">Unduh Tayangan</button>
 
@@ -69,25 +69,28 @@
 
     <h3>Bagian Ulasan</h3>
 
-    <form action="" method="post">
+    <form action="{% url 'main:insert_ulasan' %}" method="post">
         {% csrf_token %}
+        <input type="hidden" name="id_tayangan_post" value="{{ id }}">
         <textarea name="review_text" placeholder="Input untuk deskripsi ulasan"></textarea>
-        <input type="number" name="rating" min="1" max="5" placeholder="rating yang diberikan">
+        <input type="number" name="rating" min="1" max="5" placeholder="rating yang diberikan" required>
         <button type="submit">Submit</button>
     </form>
     
     <h4>Daftar Ulasan:</h4>
     <ul>
-        <li>
-            <p>Username: data</p>
-            <p>Deskripsi: data</p>
-            <p>Rating: data</p>
-        </li>
-        <li>
-            <p>Username: data</p>
-            <p>Deskripsi: data</p>
-            <p>Rating: data</p>
-        </li>
+        {% if haveUlasan %}
+            {% for review in ulasan %}
+            <li>
+                <p>Username: {{ review.1 }}</p>
+                <p>Diulas pada: {{ review.2 }}</p>
+                <p>Deskripsi: {{ review.4 }}</p>
+                <p>Rating: {{ review.3 }}</p>
+            </li>
+            {% endfor %}
+        {% else %}
+            <li>{{ ulasan }}</li>
+        {% endif %}
     </ul>
 
     <div class="modal fade" id="unduhModal" tabindex="-1" role="dialog" aria-labelledby="unduhModalLabel" aria-hidden="true">
@@ -135,7 +138,7 @@
     
 </body>
 <!-- TODO IMPLEMENT -->
-<script>
+<!-- <script>
     let watchInterval;
     
     $(document).ready(function(){
@@ -171,6 +174,6 @@
             }
         });
     });
-</script>
+</script> -->
 
 {% endblock content %}
