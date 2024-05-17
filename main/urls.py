@@ -14,7 +14,7 @@ urlpatterns = [
     path('favorit/', daftar_favorit, name='daftar_favorit'),
     path('daftar_tayangan/', show_daftar_tayangan, name="show_daftar_tayangan"),
     path('tayangan/<str:id_tayangan>', show_tayangan, name="show_tayangan"),
-    path('episode/', show_episode, name="show_episode"),
+    path('show_episode/<str:id_tayangan>/<str:judul>/<str:sub_judul>/', show_episode, name="show_episode"),
     path('insert_ulasan/', insert_ulasan, name="insert_ulasan"),
     path('compute_riwayat_nonton/', compute_riwayat_nonton, name="compute_riwayat_nonton"),
 ]
