@@ -12,12 +12,9 @@
     <h2>Judul: {{ judul }}</h2>
 
     <!-- TODO IMPLEMENT -->
-    <form id="watchForm" action="{% url 'watch' %}" method="post">
-        {% csrf_token %}
-        <label for="progress">Progress:</label>
-        <input type="range" id="progress" name="progress" min="0" max="100">
-        <button id="watchButton" type="button">Tonton</button>
-    </form>
+    <label for="progress">Progress:</label>
+    <button id="toggleButton">Tonton</button>
+    <input type="range" min="0" max="100" value="0" id="movieSlider">
     
     <button data-bs-toggle="modal" data-bs-target="#unduhModal">Unduh Tayangan</button>
 
@@ -69,25 +66,28 @@
 
     <h3>Bagian Ulasan</h3>
 
-    <form action="" method="post">
+    <form action="{% url 'main:insert_ulasan' %}" method="post">
         {% csrf_token %}
+        <input type="hidden" name="id_tayangan_post" value="{{ id }}">
         <textarea name="review_text" placeholder="Input untuk deskripsi ulasan"></textarea>
-        <input type="number" name="rating" min="1" max="5" placeholder="rating yang diberikan">
+        <input type="number" name="rating" min="1" max="5" placeholder="rating yang diberikan" required>
         <button type="submit">Submit</button>
     </form>
     
     <h4>Daftar Ulasan:</h4>
     <ul>
-        <li>
-            <p>Username: data</p>
-            <p>Deskripsi: data</p>
-            <p>Rating: data</p>
-        </li>
-        <li>
-            <p>Username: data</p>
-            <p>Deskripsi: data</p>
-            <p>Rating: data</p>
-        </li>
+        {% if haveUlasan %}
+            {% for review in ulasan %}
+            <li>
+                <p>Username: {{ review.1 }}</p>
+                <p>Diulas pada: {{ review.2 }}</p>
+                <p>Deskripsi: {{ review.4 }}</p>
+                <p>Rating: {{ review.3 }}</p>
+            </li>
+            {% endfor %}
+        {% else %}
+            <li>{{ ulasan }}</li>
+        {% endif %}
     </ul>
 
     <div class="modal fade" id="unduhModal" tabindex="-1" role="dialog" aria-labelledby="unduhModalLabel" aria-hidden="true">
@@ -136,40 +136,33 @@
 </body>
 <!-- TODO IMPLEMENT -->
 <script>
-    let watchInterval;
-    
-    $(document).ready(function(){
-        $('#watchButton').click(function(){
-            if ($(this).text() === 'Tonton') {
-                // Start watching
-                $(this).text('Stop');
-                const startDateTime = new Date();
-                $('#watchForm').append(`<input type="hidden" name="start_date_time" value="${startDateTime.toISOString()}">`);
-                watchInterval = setInterval(function() {
-                    const progress = $('#progress').val();
-                    if (progress < 100) {
-                        $('#progress').val(parseInt(progress) + 1);
-                    } else {
-                        clearInterval(watchInterval);
-                    }
-                }, 60000);  // Increase progress by 1 every minute
-            } else {
-                // Stop watching
-                $(this).text('Tonton');
-                const endDateTime = new Date();
-                $('#watchForm').append(`<input type="hidden" name="end_date_time" value="${endDateTime.toISOString()}">`);
-                clearInterval(watchInterval);
-                // Submit the form
-                $.ajax({
-                    type: 'POST',
-                    url: $('#watchForm').attr('action'),
-                    data: $('#watchForm').serialize(),
-                    success: function(){
-                        // Do something when the request is successful
-                    }
-                });
-            }
-        });
+    let isWatching = false;
+    let startSliderPosition = 0;
+    let startTime = null;
+
+    document.getElementById('toggleButton').addEventListener('click', function() {
+        const slider = document.getElementById('movieSlider');
+        const id_tayangan = document.querySelector('input[name="id_tayangan_post"]').value;  // Get id_tayangan
+        if (!isWatching) {
+            // Start watching
+            this.innerText = 'Stop';
+            startSliderPosition = slider.value;
+            startTime = new Date().toISOString().slice(0, 19).replace('T', ' ');  // Capture start time
+        } else {
+            // Stop watching
+            this.innerText = 'Tonton';
+            const endSliderPosition = slider.value;
+
+            // Call Django view with AJAX
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', '/compute_riwayat_nonton/', true);
+            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+            xhr.setRequestHeader('X-CSRFToken', '{{ csrf_token }}');  // Django CSRF token
+            xhr.send(`start=${startSliderPosition}&end=${endSliderPosition}&startTime=${startTime}&id_tayangan=${id_tayangan}`);
+
+            startTime = null;  // Reset start time
+        }
+        isWatching = !isWatching;
     });
 </script>
 

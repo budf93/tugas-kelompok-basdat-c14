@@ -1,6 +1,6 @@
 from django.urls import path
 from main.views import daftar_kontributor, langganan, halaman_beli
-from main.views import show_register,show_home, daftar_favorit, daftar_unduhan, show_trailer, show_film, show_series, show_episode, show_tayangan
+from main.views import show_register,show_home, daftar_favorit, daftar_unduhan, show_trailer, show_episode, show_tayangan, insert_ulasan, compute_riwayat_nonton
 
 app_name = 'main'
 
@@ -13,8 +13,8 @@ urlpatterns = [
     path('unduhan/', daftar_unduhan, name='daftar_unduhan'),
     path('favorit/', daftar_favorit, name='daftar_favorit'),
     path('trailer/', show_trailer, name="show_trailer"),
-    path('film/', show_film, name="show_tayangan"),
-    path('series/', show_series, name="show_tayangan"),
     path('tayangan/<str:id_tayangan>', show_tayangan, name="show_tayangan"),
     path('episode/', show_episode, name="show_episode"),
+    path('insert_ulasan/', insert_ulasan, name="insert_ulasan"),
+    path('compute_riwayat_nonton/', compute_riwayat_nonton, name="compute_riwayat_nonton"),
 ]
