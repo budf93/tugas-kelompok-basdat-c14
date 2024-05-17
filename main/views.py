@@ -5,8 +5,20 @@ from django.http import Http404
 from django.shortcuts import redirect, render
 from django.db import connection as conn
 from django.views.decorators.csrf import csrf_exempt
+from functools import wraps
 
 # Create your views here.
+
+def login_required(view_func):
+    @wraps(view_func)
+    def _wrapped_view(request, *args, **kwargs):
+        if "username" in request.session:
+            # User is logged in, proceed to the view
+            return view_func(request, *args, **kwargs)
+        else:
+            # User is a guest, redirect to login page
+            return redirect('authentication:login')
+    return _wrapped_view
 
 def daftar_kontributor(request):
     context = {
@@ -54,7 +66,7 @@ def daftar_favorit(request):
 
     return render(request, "daftar_favorit.html", context)
 
-def show_trailer(request):
+def show_daftar_tayangan(request):
 
     context = {
         'user': request.user,
@@ -135,6 +147,7 @@ def insert_ulasan(request):
             conn.commit()
     return redirect('main:show_tayangan', id_tayangan=id_tayangan_post)
 
+@login_required
 def show_tayangan(request, id_tayangan):
     tayangan_type = 'Unknown'
     with conn.cursor() as cursor:

@@ -6,7 +6,7 @@
       <div>
       {% if request.session.logged_in %}
       <a class="navbar-brand" style="color: aliceblue;" href="{% url 'main:show_home' %}">Home</a>
-      <a class="navbar-brand" style="color: aliceblue;" href="{% url 'main:show_trailer' %}">Trailer</a>
+      <a class="navbar-brand" style="color: aliceblue;" href="{% url 'main:show_daftar_tayangan' %}">Daftar Tayangan</a>
       <a class="navbar-brand" style="color: aliceblue;" href="{% url 'main:daftar_kontributor' %}">Kontributor</a>
       <a class="navbar-brand" style="color: aliceblue;" href="{% url 'main:daftar_favorit' %}">Favorit</a>
       <a class="navbar-brand" style="color: aliceblue;" href="{% url 'main:daftar_unduhan' %}">Unduhan</a>
@@ -15,7 +15,7 @@
 
       {% else %}
       <a class="navbar-brand" style="color: aliceblue;" href="{% url 'main:show_home' %}">Home</a>
-      <a class="navbar-brand" style="color: aliceblue;" href="{% url 'main:show_trailer' %}">Trailer</a>
+      <a class="navbar-brand" style="color: aliceblue;" href="{% url 'main:show_daftar_tayangan' %}">Daftar Tayangan</a>
       <a class="navbar-brand" style="color: aliceblue;" href="{% url 'authentication:login' %}">Login</a>
 
       {% endif %}
