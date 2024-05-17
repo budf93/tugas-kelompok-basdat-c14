@@ -1,7 +1,10 @@
+from datetime import datetime, timedelta
+from django.http import JsonResponse, HttpResponseBadRequest
 from django.utils import timezone
 from django.http import Http404
 from django.shortcuts import redirect, render
 from django.db import connection as conn
+from django.views.decorators.csrf import csrf_exempt
 
 # Create your views here.
 
@@ -57,6 +60,63 @@ def show_trailer(request):
     }
 
     return render(request, 'daftar_tayangan.html', context)
+
+def compute_riwayat_nonton(request):
+    if request.method == 'POST':
+        start = int(request.POST.get('start'))
+        end = int(request.POST.get('end'))
+        if start >= end:
+            return HttpResponseBadRequest('Invalid slider values: start must be less than end.')
+        start_date_time = datetime.strptime(request.POST.get('startTime'), '%Y-%m-%d %H:%M:%S')
+        username = "jbecker" # TODO CHANGE THIS
+        
+        id_tayangan = request.POST.get('id_tayangan')
+        tayangan_type = 'Unknown'
+        with conn.cursor() as cursor:
+            cursor.execute("SELECT * FROM film WHERE id_tayangan = %s", [id_tayangan])
+            film = cursor.fetchone()
+            if film is not None:
+                tayangan_type = 'Film'
+            else:
+                cursor.execute("SELECT * FROM series WHERE id_tayangan = %s", [id_tayangan])
+                series = cursor.fetchone()
+                if series is not None:
+                    tayangan_type = 'Series'
+
+        if tayangan_type == 'Unknown':
+            raise Http404("Tayangan does not exist")
+        
+        with conn.cursor() as durasi:
+            if tayangan_type == 'Film':
+                durasi.execute("""
+                                SELECT durasi_film from film
+                                WHERE id_tayangan = %s
+                                """, [id_tayangan])
+                durasi = durasi.fetchone()
+            # TODO Implement views for series
+            # elif tayangan_type == 'Series':
+
+        durasi_tayangan = durasi[0]
+        print(durasi_tayangan)
+
+        # Convert durasi_tayangan to seconds
+        durasi_tayangan_seconds = durasi_tayangan * 60
+
+        # Compute the duration watched
+        duration_watched_seconds = ((end - start) / 100) * durasi_tayangan_seconds
+
+        # Compute end_date_time
+        end_date_time = start_date_time + timedelta(seconds=duration_watched_seconds)
+        print(start_date_time, end_date_time)
+
+        with conn.cursor() as cursor:
+            cursor.execute("""
+                INSERT INTO RIWAYAT_NONTON (id_tayangan, username, start_date_time, end_date_time)
+                VALUES (%s, %s, %s, %s)
+            """, [id_tayangan, username, start_date_time, end_date_time])
+            conn.commit()
+        
+        return JsonResponse({'status': 'success'})
 
 def insert_ulasan(request):
     if request.method == 'POST':
