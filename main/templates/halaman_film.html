@@ -12,9 +12,12 @@
     <h2>Judul: {{ judul }}</h2>
 
     <!-- TODO IMPLEMENT -->
-    <label for="progress">Progress:</label>
-    <button id="toggleButton">Tonton</button>
-    <input type="range" min="0" max="100" value="0" id="movieSlider">
+    {% now "Y-m-d" as today %}
+    {% if today >= release_date_film %}
+        <label for="progress">Progress:</label>
+        <button id="toggleButton">Tonton</button>
+        <input type="range" min="0" max="100" value="0" id="movieSlider">
+    {% endif %}
     
     <button data-bs-toggle="modal" data-bs-target="#unduhModal">Unduh Tayangan</button>
 
@@ -86,7 +89,7 @@
             </li>
             {% endfor %}
         {% else %}
-            <li>{{ ulasan }}</li>
+            <p>{{ ulasan }}</p>
         {% endif %}
     </ul>
 
