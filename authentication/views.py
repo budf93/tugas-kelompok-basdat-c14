@@ -35,7 +35,7 @@ def login(request, context=None):
 
         #Search fom db
         with conn.cursor() as query:
-            query.execute("set search_path to pacilflix")
+            query.execute("set search_path to extensions")
             query.execute(f"SELECT * FROM PENGGUNA WHERE username = '{username}' AND password = '{password}'")
             pengguna = query.fetchone()
             
@@ -45,7 +45,7 @@ def login(request, context=None):
                 context["message"] = "Username atau Password Salah"
                 return render(request, 'login.html', context)
             
-            query.execute("set search_path to pacilflix")
+            query.execute("set search_path to extensions")
             request.session["username"] = username
             request.session["logged_in"] = True
             
@@ -79,7 +79,7 @@ def register_pengguna(request):
             return render(request, 'register.html', context)
         
         with conn.cursor() as query:
-            query.execute("SET search_path TO pacilflix")
+            query.execute("SET search_path TO extensions")
             query.execute(f"SELECT * FROM PENGGUNA WHERE username = '{username}'")
             existing_user = query.fetchone()
             
