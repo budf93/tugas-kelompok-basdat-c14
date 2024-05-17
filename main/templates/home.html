@@ -5,7 +5,7 @@
 <div style="margin: auto; width: 20vw; padding-top: 30vh;"> 
 
     <h1>PacilFlix - C14</h1>
-
+    <h2>Welcome {{ request.session.username }}</h2>
     {% if request.session.logged_in %}
     {% else %}
         <table>
