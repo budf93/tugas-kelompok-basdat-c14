@@ -20,11 +20,12 @@ def halaman_beli(request):
 
     return render(request, "halaman_beli.html", context)
 
-def show_home(request):
-    context = {}
-    conn.cursor().execute("Select * FROM PENGGUNA")
-    print(conn.cursor().fetchall)
-    print()
+def show_home(request,context=None):
+    print(context)
+    if context is None:
+        context = {
+        "logged_in": False
+    }
     return render(request, "home.html", context)
 
 def show_login(request):
