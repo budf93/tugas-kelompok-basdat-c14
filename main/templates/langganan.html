@@ -17,22 +17,16 @@
         </tr>
         </thead>
         <tbody>
+            {% for paket_langganan in list_paket_langganan_aktif %}
             <tr>
-                <td class="border">Udin</td>
-                <td class="border">Rp. 500000</td>
-                <td class="border">3840x2160</td>
-                <td class="border">iOS, Android</td>
-                <td class="border">15-04-2024</td>
-                <td class="border">15-06-2024</td>
+                <td class="border">{{ paket_langganan.nama }}</td>
+                <td class="border">{{ paket_langganan.harga }}</td>
+                <td class="border">{{ paket_langganan.resolusi_layar }}</td>
+                <td class="border">{{ paket_langganan.dukungan_perangkat }}</td>
+                <td class="border">{{ paket_langganan.tanggal_dimulai }}</td>
+                <td class="border">{{ paket_langganan.tanggal_akhir }}</td>
             </tr>
-            <tr>
-                <td class="border">Asep</td>
-                <td class="border">Rp. 500000</td>
-                <td class="border">3840x2160</td>
-                <td class="border">iOS, Android</td>
-                <td class="border">15-04-2024</td>
-                <td class="border">15-06-2024</td>
-            </tr>
+            {% endfor %}
         </tbody>
     </table>
     <p>Pilih Paket Lain:</p>
@@ -48,24 +42,17 @@
         </tr>
         </thead>
         <tbody>
-        <tr>
-            <td class="border">Asep</td>
-            <td class="border">100000</td>
-            <td class="border">1280x720</td>
-            <td class="border">Android</td>
-            <td class="border">
-                <a class="btn btn-primary" href="#" role="button">Beli</a>
-            </td>
-        </tr>
-        <tr>
-            <td class="border">Agus</td>
-            <td class="border">200000</td>
-            <td class="border">1280x720</td>
-            <td class="border">Android</td>
-            <td class="border">
-                <a class="btn btn-primary" href="#" role="button">Beli</a>
-            </td>
-        </tr>
+        {% for paket_lain in list_paket_lain %}
+            <tr>
+                <td class="border">{{ paket_lain.nama }}</td>
+                <td class="border">{{ paket_lain.harga }}</td>
+                <td class="border">{{ paket_lain.resolusi_layar }}</td>
+                <td class="border">{{ paket_lain.dukungan_perangkat }}</td>
+                <td class="border">
+                    <a class="btn btn-primary" href="{% url 'main:halaman_beli' %}?nama={{paket_lain.nama}}" role="button">Beli</a>
+                </td>
+            </tr>
+        {% endfor %}
         </tbody>
     </table>
     <p>Riwayat Transaksi:</p>
@@ -84,12 +71,12 @@
         <tbody>
         {% for transaksi in list_riwayat_transaksi %}
         <tr>
-            <td class="border">{{ transaksi.nama }}</td>
-            <td class="border">15-04-2024</td>
-            <td class="border">15-04-2026</td>
-            <td class="border">Bitcoin</td>
-            <td class="border">14-04-2024</td>
-            <td class="border">200000</td>
+            <td class="border">{{ transaksi.nama_paket }}</td>
+            <td class="border">{{ transaksi.tanggal_dimulai }}</td>
+            <td class="border">{{ transaksi.tanggal_akhir }}</td>
+            <td class="border">{{ transaksi.metode_pembayaran }}</td>
+            <td class="border">{{ transaksi.tanggal_pembayaran }}</td>
+            <td class="border">{{ transaksi.total_pembayaran }}</td>
         </tr>
         {% endfor %}
         </tbody>

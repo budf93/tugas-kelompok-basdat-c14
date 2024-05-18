@@ -3,9 +3,6 @@ import psycopg2
 from django.db import connection as conn
 from django.views.decorators.http import require_http_methods
 
-# Create your views here.
-# fokus ke view langganan, halaman beli, cara ngurus querynya, belajar topik2 di pbp yg terkait
-
 def daftar_kontributor(request):
     try:
         cursor = conn.cursor()
@@ -48,11 +45,11 @@ def daftar_kontributor(request):
         """
 
         cursor.execute(query)
-        all_rows = cursor.fetchall()
+        kontributor_output = cursor.fetchall()
 
         kontributor_list = []
 
-        for res in kontributor_list:
+        for res in kontributor_output:
             kontributor_list.append({
                 "id": res[0],
                 "nama": res[1],
@@ -78,79 +75,188 @@ def daftar_kontributor(request):
 
     return render(request, "daftar_kontributor.html", context)
 
+
+@require_http_methods(["GET","POST"])
 def langganan(request):
     try:
         cursor = conn.cursor()
-        query = """
 
-        """
+        print(request.session.get('username'))
+        #todo
+        query = f"""SELECT distinct
+            paket.nama, 
+            paket.harga, 
+            paket.resolusi_layar, 
+            dukungan_perangkat.dukungan_perangkat AS dukungan_perangkat, 
+            transaction.start_date_time, 
+            transaction.end_date_time
+        FROM 
+            paket
+        JOIN 
+            dukungan_perangkat 
+        ON 
+            paket.nama = dukungan_perangkat.nama_paket
+        JOIN 
+            transaction 
+        ON 
+            paket.nama = transaction.nama_paket
+        JOIN 
+            pengguna 
+        ON 
+            transaction.username = '{request.session.get('username')}'
+        WHERE
+            transaction.end_date_time > NOW();"""
 
         cursor.execute(query)
-        all_rows = cursor.fetchall()
+        paket_langganan_output = cursor.fetchall()
 
-        kontributor_list = []
+        # #todo
+        # query = """
+        #     SELECT paket.nama, harga, resolusi_layar, string_agg(dukungan_perangkat, ', ')
+        #     FROM paket        
+        #     JOIN dukungan_perangkat ON paket.nama = dukungan_perangkat.nama_paket
+        #     GROUP BY paket.nama, harga, resolusi_layar;
+        # """
 
-        for res in kontributor_list:
-            kontributor_list.append({
-                "id": res[0],
-                "nama": res[1],
-                "tipe": res[2],
-                "jenis_kelamin": res[3],
-                "kewarganegaraan": res[4]         
-            })
+        # cursor.execute(query)
+        # paket_lain_output = cursor.fetchall()
 
-        cursor.execute()
+        # list_paket_lain = []
 
-        #send all data to html through context 
+        # for res in paket_lain_output:
+        #     list_paket_lain.append({  
+        #         "nama" : res[0],
+        #         "harga" : res[1],
+        #         "resolusi_layar": res[2],
+        #         "dukungan_perangkat": res[3]
+        #     })
+        
+        # #todo
+        # query = f"""
+        # select 
+        # nama, transaction.start_date_time, transaction.end_date_time, metode_pembayaran, timestamp_pembayaran, sum(harga)
+        # from paket 
+        # join transaction on paket.nama = transaction.nama_paket
+        # join pengguna on transaction.username = {request.session.get('username')}
+        # group by nama, transaction.start_date_time, transaction.end_date_time, metode_pembayaran, timestamp_pembayaran;
+        # """
+
+        # cursor.execute(query)
+        # riwayat_transaksi_output = cursor.fetchall()
+
+        # list_riwayat_transaksi = []
+
+        # for res in riwayat_transaksi_output:
+        #     list_riwayat_transaksi.append({     
+        #         "nama_paket": res[0],
+        #         "tanggal_dimulai": res[1],
+        #         "tanggal_akhir": res[2],
+        #         "metode_pembayaran": res[3],
+        #         "tanggal_pembayaran": res[4],
+        #         "total_pembayaran" : res[5]
+        #     })
+
+        # cursor.execute()
+
+        # #send all data to html through context 
+        # context = {
+        #     'list_paket_langganan_aktif':list_paket_langganan_aktif,
+        #     'list_paket_lain':list_paket_lain,
+        #     'list_riwayat_transaksi':list_riwayat_transaksi
+        # }
+
+        # context = {
+        #     'list_paket_langganan_aktif' : list_paket_langganan_aktif
+        # }
+
         context = {
-            'list_paket_langganan_aktif':list_paket_langganan_aktif,
-            'list_paket_lain':list_paket_lain,
-            'list_riwayat_transaksi':list_riwayat_transaksi
+        'list_paket_langganan_aktif' : [{
+            "nama" : res[0],
+            "harga" : res[1],
+            "resolusi_layar" : res[2],
+            "dukungan_perangkat" : res[3],
+            "tanggal_dimulai" : res[4],
+            "tanggal_akhir" : res[5]
         }
+        for res in paket_langganan_output],
+        # 'list_paket_lain' : [{
+        #     "nama" : res[0],
+        #         "harga" : res[1],
+        #         "resolusi_layar": res[2],
+        #         "dukungan_perangkat": res[3]
+        # }
+        # for res in paket_lain_output],
+        # 'list_riwayat_transaksi' : [{
+        #     "nama_paket": res[0],
+        #     "tanggal_dimulai": res[1],
+        #     "tanggal_akhir": res[2],
+        #     "metode_pembayaran": res[3],
+        #     "tanggal_pembayaran": res[4],
+        #     "total_pembayaran" : res[5]
+        # }
+        # for res in riwayat_transaksi_output],
+        }
+        return render(request, "langganan.html", context)
 
     except (Exception, psycopg2.Error) as error:
         print("Error while fetching data from PostgreSQL", error)
 
     finally:
         # closing database connection.
-        if connection:
+        if conn:
             cursor.close()
-            connection.close()
+            conn.close()
             print("PostgreSQL connection is closed")
-
-    return render(request, "langganan.html", context)
+        
+    # return redirect("main:halaman_beli")
+            
 
 @require_http_methods(["GET","POST"])
-def halaman_beli(request, beli):
+def halaman_beli(request):
     if request.session.get('username') is not None:
-        try:
-            cursor = connection.cursor()
+        try:          
+            if request.method == "GET":
+                nama = request.GET.get('nama')
+                print(nama)
+            cursor = conn.cursor()
             if request.method == "POST":
                 print()
             else:
-                print()
-            connection.commit()
+                cursor.execute(
+                    """
+                    
+                    """
+                )
+                daftar_paket = cursor.fetchall()
+                list_paket_lain = [
+                    {
+                        
+                    }
+                ]
+                return render(request, 'main:langganan', {"list_paket_lain":list_paket_lain})
+            conn.commit()
+            return redirect('main:langganan')
 
         except (Exception, psycopg2.Error) as error:
             print("Error while fetching data from PostgreSQL", error)
 
         finally:
             # closing database connection.
-            if connection:
+            if conn:
                 cursor.close()
-                connection.close()
+                conn.close()
                 print("PostgreSQL connection is closed")
+    else:
+        print(redirect('main:show_login'))
 
+    return redirect('main:show_trailer')
 
-
-
-    return redirect('main:langganan')
-
-def show_home(request):
-    context = {}
-    conn.cursor().execute("Select * FROM PENGGUNA")
-    print(conn.cursor().fetchall)
-    print()
+def show_home(request,context=None):
+    print(context)
+    if context is None:
+        context = {
+        "logged_in": False
+    }
     return render(request, "home.html", context)
 
 def show_login(request):

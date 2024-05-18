@@ -16,18 +16,14 @@
         </tr>
         </thead>
         <tbody>
+        {% for paket_lain in list_paket_lain %}
         <tr>
-            <td class="border">Udin</td>
-            <td class="border">Rp. 500000</td>
-            <td class="border">3840x2160</td>
-            <td class="border">iOS, Android</td>
+            <td class="border">{{ paket_lain.nama }}</td>
+            <td class="border">{{ paket_lain.harga }}</td>
+            <td class="border">{{ paket_lain.resolusi.layar }}</td>
+            <td class="border">{{ paket_lain.dukungan_perangkat }}</td>
         </tr>
-        <tr>
-            <td class="border">Asep</td>
-            <td class="border">Rp. 500000</td>
-            <td class="border">3840x2160</td>
-            <td class="border">iOS, Android</td>
-        </tr>
+        {% endfor %}
         </tbody>
     </table>
     <p>Pilih metode pembayaran:</p>
@@ -37,9 +33,9 @@
         Pilih Metode Pembayaran:
     </button>
     <ul class="dropdown-menu" aria-labelledby="metode-pembayaran-dropdown">
-        <li><a class="dropdown-item" href="#">Transfer Bank</a></li>
-        <li><a class="dropdown-item" href="#">Kartu Kredit</a></li>
-        <li><a class="dropdown-item" href="#">E-Wallet</a></li>
+        {% for metode_pembayaran in list_metode_pembayaran %}
+            <li><a class="dropdown-item" href="#">{{ metode_pembayaran }}</a></li>
+        {% endfor %}
     </ul>
     <div class="col-md-12 text-center">
         <button type="button" class="btn btn-primary">Bayar</button>
