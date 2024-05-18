@@ -11,7 +11,8 @@
 <div class = "login">
     <div style="margin: auto; width: 20vw; padding-top: 26vh;"> 
     <h1>Register</h1>   
-        <form method="POST" >  
+        
+        <form method="POST" action="{% url 'authentication:register_pengguna' %}">  
             {% csrf_token %}  
             <table>
                 <tr>
@@ -28,13 +29,20 @@
                     <td>Negara Asal: </td>
                     <td style="padding-bottom: 10px;"><input type="negara-asal" name="negara-asal" placeholder="Negara Asal" class="form-control"></td>
                 </tr>
-    
+                <tr>
+                    {% if message %}
+                    <div class="alert alert-danger">{{ message }}</div>
+                    {% endif %}
+                </tr>
                 <tr>
                     <td></td>
                     <td><input class="btn btn-info" type="submit" value="Daftar"></td>
+                    
                 </tr>
+                
             </table> 
         </form>
+        
         </div> 
 
 </div>  

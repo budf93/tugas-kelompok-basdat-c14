@@ -5,22 +5,29 @@
 <div style="margin: auto; width: 20vw; padding-top: 30vh;"> 
 
     <h1>PacilFlix - C14</h1>
+    <h2>Welcome {{ request.session.username }}</h2>
+    {% if request.session.logged_in %}
+    {% else %}
         <table>
 
             <tr>    
                 <td>
-                <button><a style="text-decoration: none;" href="{% url 'main:show_login' %}">Login</a>
+                <button><a style="text-decoration: none;" href="{% url 'authentication:login' %}">Login</a>
                 </button>
                 </td>
             </tr>   
 
             <tr>
                 <td>
-                    <button><a style="text-decoration: none;" href="{% url 'main:show_register' %}">Register</a>
+                    <button><a style="text-decoration: none;" href="{% url 'authentication:register_pengguna' %}">Register</a>
                     </button>
                 </td>
             </tr>
 
+
         </table>
+
+     
+     {% endif %}
 
 {% endblock content %}

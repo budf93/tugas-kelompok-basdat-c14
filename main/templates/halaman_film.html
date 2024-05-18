@@ -2,60 +2,70 @@
 {% load static %}
 
 {% block meta %}
-<title>Halaman Tayangan</title>
+<title>Halaman Film</title>
 {% endblock meta %}
 
 {% block content %}
 
 <body>
-    <!-- Uncomment sesuai kebutuhan-->
-    <h1>HALAMAN SERIES</h1>
-    <!-- <h1>HALAMAN FILM</h1> -->
-    <h2>Judul: data</h2>
-    <!-- Uncomment jika series-->
-    <h4>Episode:</h2>
-    <ul>
-        <li><a href="{% url 'main:show_episode' %}">Episode 1</a></li>
-        <li><a href="{% url 'main:show_episode' %}">Episode 2</a></li>
-        <li><a href="{% url 'main:show_episode' %}">Episode 3</a></li>
-    </ul> 
+    <h1>HALAMAN FILM</h1>
+    <h2>Judul: {{ judul }}</h2>
 
-    <button>Tonton</button>
+    <!-- TODO IMPLEMENT -->
+    <form id="watchForm" action="{% url 'watch' %}" method="post">
+        {% csrf_token %}
+        <label for="progress">Progress:</label>
+        <input type="range" id="progress" name="progress" min="0" max="100">
+        <button id="watchButton" type="button">Tonton</button>
+    </form>
+    
     <button data-bs-toggle="modal" data-bs-target="#unduhModal">Unduh Tayangan</button>
 
     <button data-bs-toggle="modal" data-bs-target="#favoritModal">Favorit Tayangan</button>
 
-    <p>Total View: data</p>
-    <p>Rating Rata-Rata: data</p>
-    <p>Sinopsis: data</p>
-    <p>Durasi Film: data</p>
-    <p>Tanggal Rilis Film: data</p>
-    <p>URL Film: data</p>
+    <p>Total View: {{ total_view }}</p>
+    <p>Rating Rata-Rata: {{ avg_rating }}</p>
+    <p>Sinopsis: {{ sinopsis }}</p>
+    <p>Durasi Film: {{ durasi_film }} menit</p>
+    <p>Tanggal Rilis Film: {{ release_date_film }}</p>
+    <p>URL Film: <a href="{{ url_video_film }}">{{ url_video_film }}</a></p>
 
     <h3>Genre:</h3>
-    <ul>
-        <li>nama_genre_1</li>
-        <li>nama_genre_2</li>
-        <li>nama_genre_3</li>
-    </ul>
+    {% if haveGenres %}
+        <ul>
+        {% for g in genre %}
+            <li>{{ g.0 }}</li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <p>{{ genre }}</p>
+    {% endif %}
 
-    <h3>Asal Negara: data</h3>
+    <h3>Asal Negara: {{ asal_negara }}</h3>
 
     <h3>Pemain:</h3>
-    <ul>
-        <li>nama_pemain_1</li>
-        <li>nama_pemain_2</li>
-        <li>nama_pemain_3</li>
-    </ul>
+    {% if haveActors %}
+        <ul>
+        {% for a in actors %}
+            <li>{{ a.0 }}</li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <p>{{ actors }}</p>
+    {% endif %}
 
     <h3>Penulis Skenario:</h3>
-    <ul>
-        <li>nama_penulis_skenario_1</li>
-        <li>nama_penulis_skenario_2</li>
-        <li>nama_penulis_skenario_3</li>
-    </ul>
+    {% if haveWriters %}
+        <ul>
+        {% for w in writers %}
+            <li>{{ w.0 }}</li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <p>{{ writers }}</p>
+    {% endif %}
 
-    <h3>Sutradara: data</h3>
+    <h3>Sutradara: {{ sutradara }}</h3>
 
     <h3>Bagian Ulasan</h3>
 
@@ -124,5 +134,43 @@
     </div>
     
 </body>
+<!-- TODO IMPLEMENT -->
+<script>
+    let watchInterval;
+    
+    $(document).ready(function(){
+        $('#watchButton').click(function(){
+            if ($(this).text() === 'Tonton') {
+                // Start watching
+                $(this).text('Stop');
+                const startDateTime = new Date();
+                $('#watchForm').append(`<input type="hidden" name="start_date_time" value="${startDateTime.toISOString()}">`);
+                watchInterval = setInterval(function() {
+                    const progress = $('#progress').val();
+                    if (progress < 100) {
+                        $('#progress').val(parseInt(progress) + 1);
+                    } else {
+                        clearInterval(watchInterval);
+                    }
+                }, 60000);  // Increase progress by 1 every minute
+            } else {
+                // Stop watching
+                $(this).text('Tonton');
+                const endDateTime = new Date();
+                $('#watchForm').append(`<input type="hidden" name="end_date_time" value="${endDateTime.toISOString()}">`);
+                clearInterval(watchInterval);
+                // Submit the form
+                $.ajax({
+                    type: 'POST',
+                    url: $('#watchForm').attr('action'),
+                    data: $('#watchForm').serialize(),
+                    success: function(){
+                        // Do something when the request is successful
+                    }
+                });
+            }
+        });
+    });
+</script>
 
 {% endblock content %}

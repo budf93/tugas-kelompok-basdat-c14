@@ -3,12 +3,8 @@
 
 
 {% block content %}
-
-
-<div class = "login" style="margin: auto; width: 20vw; padding-top: 30vh;"> 
-
+<div class="login" style="margin: auto; width: 20vw; padding-top: 30vh;"> 
     <h1>Login</h1>
-
     <form method="POST" action="{% url 'authentication:login' %}">
         {% csrf_token %}
         <table>
@@ -16,19 +12,19 @@
                 <td>Username: </td>
                 <td><input type="text" name="username" placeholder="Username" class="form-control"></td>
             </tr>
-                    
             <tr>
                 <td>Password: </td>
                 <td><input type="password" name="password" placeholder="Password" class="form-control"></td>
             </tr>
-
             <tr>
                 <td></td>
                 <td><input class="btn btn-info" type="submit" value="Login"></td>
             </tr>
         </table>
     </form>
-
-    Don't have an account yet? <a href="{% url 'main:show_register' %}">Register Now</a>
-
+    {% if message %}
+        <div class="alert alert-danger">{{ message }}</div>
+    {% endif %}
+    Don't have an account yet? <a href="{% url 'authentication:register_pengguna' %}">Register Now</a>
+</div>
 {% endblock content %}
