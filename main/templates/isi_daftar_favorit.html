@@ -3,26 +3,25 @@
   <div class="row justify-content-center">
     <div class="col-md-8 mt-4">
       <div class="card">
-        <div class="card-header text-center">Daftar Unduhan</div>
+        <div class="card-header text-center">{{ judul }}</div>
 
         <div class="card-body">
           <table class="table table-striped text-center" id="table_unduhan">
             <thead>
               <tr>
-                <th>Judul</th>
-                <th>Waktu Ditambahkan</th>
+                <th>Judul Tayangan</th>
                 <th>Aksi</th>
               </tr>
             </thead>
             <tbody>
-              {% for unduhan in daftar_unduhan %}
+              {% for favorite in favorites %}
               <tr>
-                <td>{{ unduhan.0 }}</td>
-                <td>{{ unduhan.1 }}</td>
+                <td>{{ favorite.0 }}</td>
                 <td>
                   <button
                     class="btn btn-danger delete-btn"
-                    data-judul="{{ unduhan.0 }}"
+                    data-judul="{{ favorite.0 }}"
+                    data-nama-playlist="{{ judul }}"
                   >
                     Hapus
                   </button>
@@ -46,14 +45,16 @@
     document.querySelectorAll(".delete-btn").forEach((button) => {
       button.addEventListener("click", function () {
         const judul = this.getAttribute("data-judul");
+        const nama = this.getAttribute("data-nama-playlist");
+        console.log(nama)
 
-        fetch(`{% url 'main:delete_unduhan' %}`, {
+        fetch(`{% url 'main:delete_dari_favorit' %}`, {
           method: "DELETE",
           headers: {
             "Content-Type": "application/json",
             "X-CSRFToken": "{{ csrf_token }}",
           },
-          body: JSON.stringify({ judul }),
+          body: JSON.stringify({ judul, nama }),
         })
           .then((response) => {
             if (response.ok) {
@@ -72,34 +73,4 @@
   });
 </script>
 
-{% if error %}
-<div class="modal" tabindex="-1" id="errorModal">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">
-          GAGAL MENGHAPUS TAYANGAN DARI DAFTAR UNDUHAN
-        </h5>
-      </div>
-      <div class="modal-body">
-        <p>{{ error }}</p>
-      </div>
-      <div class="modal-footer">
-        <form method="post" action="{% url 'main:clear_error' %}">
-            {% csrf_token %}
-            <button type="submit" class="btn btn-danger" data-bs-dismiss="modal">
-                Tutup Modal
-            </button>
-        </form>
-      </div>
-    </div>
-  </div>
-</div>
-
-<script>
-  document.addEventListener("DOMContentLoaded", function () {
-    var errorModal = new bootstrap.Modal(document.getElementById("errorModal"));
-    errorModal.show();
-  });
-</script>
-{% endif %} {% endblock content %}
+{% endblock content %}

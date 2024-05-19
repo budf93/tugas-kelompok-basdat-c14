@@ -1,6 +1,5 @@
 from django.urls import path
-from main.views import daftar_kontributor, langganan, halaman_beli
-from main.views import show_register,show_home, daftar_favorit, daftar_unduhan, show_daftar_tayangan, show_episode, show_tayangan, insert_ulasan, compute_riwayat_nonton, search_tayangan
+from main.views import *
 
 app_name = 'main'
 
@@ -11,7 +10,13 @@ urlpatterns = [
     path('register/', show_register, name='show_register'),
     path('', show_home, name="show_home"),
     path('unduhan/', daftar_unduhan, name='daftar_unduhan'),
+    path('delete-unduhan/', delete_unduhan, name='delete_unduhan'),
+    path('tambah-unduhan/', tambah_unduhan, name='tambah_unduhan'),
     path('favorit/', daftar_favorit, name='daftar_favorit'),
+    path('isi-daftar-favorit/<str:judul>/', isi_daftar_favorit, name='isi_daftar_favorit'),
+    path('delete-daftar-favorit/', delete_daftar_favorit, name='delete_daftar_favorit'),
+    path('delete-dari-favorit/', delete_dari_favorit, name='delete_dari_favorit'),
+    path('add-to-favorit/', add_to_favorit, name='add_to_favorit'),
     path('show_daftar_tayangan/', show_daftar_tayangan, name="show_daftar_tayangan"),
     path('tayangan/<str:id_tayangan>', show_tayangan, name="show_tayangan"),
     path('show_episode/<str:id_tayangan>/<str:judul>/<str:sub_judul>/', show_episode, name="show_episode"),

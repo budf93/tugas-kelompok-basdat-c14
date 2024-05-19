@@ -1,42 +1,75 @@
-{% extends 'base.html' %}
-
-{% block content %}
+{% extends 'base.html' %} {% block content %}
 <div class="container">
-    <div class="row justify-content-center">
-        <div class="col-md-8 mt-4">
-            <div class="card">
-                <div class="card-header text-center">Daftar Favorit</div>
-                
-                <div class="card-body">
-                    <table class="table table-striped text-center">
-                        <thead>
-                            <tr>
-                                <th>Judul</th>
-                                <th>Waktu Ditambahkan</th>
-                                <th>Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>Lord of the Rings</td>
-                                <td>2024-04-28 10:00:00</td>
-                                <td><button class="btn btn-danger">Hapus</button></td>
-                            </tr>
-                            <tr>
-                                <td>Godzilla and Kong</td>
-                                <td>2024-04-28 11:00:00</td>
-                                <td><button class="btn btn-danger">Hapus</button></td>
-                            </tr>
-                            <tr>
-                                <td>Exhuma</td>
-                                <td>2024-04-28 12:00:00</td>
-                                <td><button class="btn btn-danger">Hapus</button></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+  <div class="row justify-content-center">
+    <div class="col-md-8 mt-4">
+      <div class="card">
+        <div class="card-header text-center">Daftar Favorit</div>
+
+        <div class="card-body">
+          <table class="table table-striped text-center">
+            <thead>
+              <tr>
+                <th>Judul</th>
+                <th>Waktu Dibuat</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for favorit in daftar_favorit %}
+              <tr>
+                <td><a href="{% url 'main:isi_daftar_favorit' judul=favorit.0|urlencode %}">{{ favorit.0 }}</a></td>
+                <td>{{ favorit.1 }}</td>
+                <td>
+                  <button
+                    class="btn btn-danger delete-btn"
+                    data-judul="{{ favorit.0 }}"
+                  >
+                    Hapus
+                  </button>
+                </td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="3">Daftar favorit masih kosong...</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
         </div>
+      </div>
     </div>
+  </div>
 </div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+      document.querySelectorAll(".delete-btn").forEach((button) => {
+        button.addEventListener("click", function () {
+          const judul = this.getAttribute("data-judul");
+  
+          fetch(`{% url 'main:delete_daftar_favorit' %}`, {
+            method: "DELETE",
+            headers: {
+              "Content-Type": "application/json",
+              "X-CSRFToken": "{{ csrf_token }}",
+            },
+            body: JSON.stringify({ judul }),
+          })
+            .then((response) => {
+              if (response.ok) {
+                return response.text();
+              } else {
+                throw new Error("Something went wrong on the server.");
+              }
+            })
+            .then((data) => {
+              console.log(data);
+              location.reload();
+            })
+            .catch((error) => console.error("Error:", error));
+        });
+      });
+    });
+  </script>
+
 {% endblock content %}

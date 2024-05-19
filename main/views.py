@@ -1,12 +1,17 @@
 from datetime import datetime, timedelta, date
 import math
-from django.http import JsonResponse, HttpResponseBadRequest
 from django.utils import timezone
 from django.http import Http404
 from django.shortcuts import redirect, render
 from django.db import connection as conn
 from django.views.decorators.csrf import csrf_exempt
 from functools import wraps
+import json
+from django.http import HttpResponse, HttpResponseNotAllowed, HttpResponseNotFound, HttpResponseRedirect, JsonResponse, HttpResponseBadRequest
+from django.urls import reverse
+from dateutil import parser
+from django.contrib import messages
+from urllib.parse import unquote
 
 # Create your views here.
 
@@ -34,6 +39,7 @@ def check_active_package(request):
     displayTombol = False
     if "username" in request.session:
         with conn.cursor() as cursor:
+            cursor.execute("SET search_path TO extensions")
             now = datetime.now()
 
             query = """
@@ -87,14 +93,155 @@ def show_register(request):
     return render(request, "register.html", context)
 
 def daftar_unduhan(request):
-    context = {}
+    with conn.cursor() as unduhan_user:
+        unduhan_user.execute("SET search_path TO extensions")
+        unduhan_user.execute(f"""
+            SELECT t.judul, tt.timestamp
+            FROM tayangan_terunduh as tt
+            LEFT JOIN tayangan as t on tt.id_tayangan = t.id
+            WHERE tt.username = '{request.session.get('username', None)}'; 
+        """)
+
+    context = {
+        'daftar_unduhan': unduhan_user.fetchall(),
+    }
 
     return render(request, "daftar_unduhan.html", context)
 
+def delete_unduhan(request):
+    if request.method == 'DELETE':
+        judul = json.loads(request.body).get('judul')
+        try:
+            with conn.cursor() as delete:
+                delete.execute("SET search_path TO extensions")
+                delete.execute(f"""
+                    DELETE FROM tayangan_terunduh
+                    WHERE id_tayangan IN (
+                        SELECT id
+                        FROM tayangan
+                        WHERE judul = '{judul}'
+                    ) AND username = '{request.session.get('username', None)}';
+                    """)
+            return HttpResponse(b"DELETED", 201)
+        except Exception:
+            request.session['error'] = "Tayangan minimal harus berada di daftar unduhan selama 1 hari agar bisa dihapus."
+            return HttpResponseRedirect(reverse("main:daftar_unduhan"))
+    
+    return HttpResponseNotFound()
+
+def tambah_unduhan(request):
+    if request.method == 'POST':
+        username = request.session.get('username', None)
+        judul = request.POST.get('judul')
+        with conn.cursor() as cursor:
+            cursor.execute("SET search_path TO extensions")
+            cursor.execute(f"""
+                INSERT INTO tayangan_terunduh (id_tayangan, username, timestamp)
+                SELECT t.id, '{username}', CURRENT_TIMESTAMP
+                FROM tayangan t
+                WHERE t.judul = '{judul}'
+                AND NOT EXISTS (
+                    SELECT 1
+                    FROM tayangan_terunduh tt
+                    WHERE tt.id_tayangan = t.id
+                    AND tt.username = '{username}'
+                );
+            """)
+        messages.success(request, f'Selamat! Anda telah berhasil mengunduh {judul} dan akan berlaku hingga [current time + 7 hari]. Cek informasi selengkapnya pada halaman daftar unduhan.')
+        return HttpResponseRedirect(reverse('main:show_tayangan'))
+    return HttpResponseNotFound()
+
 def daftar_favorit(request):
-    context = {}
+    with conn.cursor() as favorit_user:
+        favorit_user.execute("SET search_path TO extensions")
+        favorit_user.execute(f"""
+            SELECT df.judul, df.timestamp
+            FROM daftar_favorit as df
+            WHERE df.username = '{request.session.get('username', None)}'; 
+        """)
+
+    context = {
+        'daftar_favorit': favorit_user.fetchall(),
+    }
 
     return render(request, "daftar_favorit.html", context)
+
+def delete_daftar_favorit(request):
+    if request.method == 'DELETE':
+        judul = json.loads(request.body).get('judul')
+        with conn.cursor() as delete:
+            delete.execute("SET search_path TO extensions")
+            delete.execute(f"""
+                DELETE FROM daftar_favorit
+                WHERE judul = '{judul}' AND username = '{request.session.get('username', None)}';
+            """)
+        #"2023-12-15 22:03:55"
+        return HttpResponse(b"DELETED", 201)
+    
+    return HttpResponseNotFound()
+
+def isi_daftar_favorit(request, judul):
+    judul = unquote(judul)
+    with conn.cursor() as favorite:
+        favorite.execute("SET search_path TO extensions")
+        favorite.execute(f"""
+            SELECT t.judul, df.judul as daftar_favorit, tdf.timestamp
+            FROM daftar_favorit as df
+            JOIN tayangan_memiliki_daftar_favorit as tdf
+            ON df.username = tdf.username AND df.timestamp = tdf.timestamp
+            LEFT JOIN tayangan as t
+            ON t.id = tdf.id_tayangan
+            WHERE df.username = '{request.session.get('username')}' AND df.judul = '{judul}';
+        """)
+
+    context = {
+        'judul': judul,
+        'favorites': favorite.fetchall(),
+    }
+
+    return render(request, "isi_daftar_favorit.html", context)
+
+def delete_dari_favorit(request):
+    if request.method == 'DELETE':
+        nama_playlist = json.loads(request.body).get('nama')
+        judul = json.loads(request.body).get('judul')
+        with conn.cursor() as delete:
+            delete.execute("SET search_path TO extensions")
+            delete.execute(f"""
+                DELETE FROM tayangan_memiliki_daftar_favorit AS tdf
+                USING daftar_favorit AS df, tayangan AS t
+                WHERE tdf.username = df.username AND tdf.timestamp = df.timestamp
+                AND t.id = tdf.id_tayangan
+                AND df.username = '{request.session.get('username')}'
+                AND t.judul = '{judul}'
+                AND df.judul = '{nama_playlist}';
+            """)
+        return HttpResponse(b"DELETED", 201)
+    
+    return HttpResponseNotFound()
+
+def add_to_favorit(request):
+    if request.method == 'POST':
+        judul = request.POST.get('judul_tayangan')
+        daftar_favorit = request.POST.get('daftar_favorit')
+        print(judul)
+        print(daftar_favorit)
+        with conn.cursor() as cursor:
+            cursor.execute("SET search_path TO extensions")
+            cursor.execute(f"""
+                INSERT INTO TAYANGAN_MEMILIKI_DAFTAR_FAVORIT (id_tayangan, timestamp, username)
+                SELECT 
+                    (SELECT t.id
+                    FROM tayangan AS t
+                    WHERE t.judul = '{judul}'),
+                    (SELECT df.timestamp
+                    FROM daftar_favorit AS df
+                    WHERE df.judul = '{daftar_favorit}'),
+                    '{request.session.get('username')}';
+            """)
+        return show_tayangan(request)
+    
+    return HttpResponseNotFound()
 
 def search_tayangan(request):
     title = request.GET.get('title', '')
@@ -461,6 +608,15 @@ def show_tayangan(request, id_tayangan):
             ulasan = "There are no reviews for this show"
             haveUlasan = False
 
+    with conn.cursor() as cursor2:
+        cursor2.execute("SET search_path TO extensions")
+        cursor2.execute(f"""
+            SELECT df.judul
+            FROM daftar_favorit as df
+            WHERE df.username = '{request.session.get('username', None)}';
+        """)
+        daftar_favorit = cursor2.fetchall()
+
     context = {
         'user': request.session.get('username'),
         'tayangan_type': tayangan_type,
@@ -483,6 +639,8 @@ def show_tayangan(request, id_tayangan):
         'haveWriters': haveWriters,
         'ulasan': ulasan,
         'haveUlasan': haveUlasan,
+        'daftar_favorit': daftar_favorit,
+        'tayangan': tayangan
     }
 
     if tayangan_type == 'Series':
