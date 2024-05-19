@@ -1,6 +1,5 @@
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.forms import AuthenticationForm
 from django.db import connection as conn
 from django.http import (HttpResponse, HttpResponseNotFound, HttpResponseRedirect,
                          JsonResponse)
@@ -50,7 +49,7 @@ def login(request, context=None):
             request.session["username"] = username
             request.session["logged_in"] = True
             
-            return redirect('main:show_home')
+            return redirect('main:show_daftar_tayangan')
             
     return render(request, 'login.html', context)
 
