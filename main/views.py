@@ -1,7 +1,26 @@
-from django.shortcuts import render, redirect
-import psycopg2
-from django.db import connection as conn
+import datetime
+import json
+from django.shortcuts import redirect, render
+from django.db import connection
+from django.http import HttpResponse, HttpResponseNotAllowed, HttpResponseNotFound, HttpResponseRedirect, JsonResponse
+from django.urls import reverse
+from dateutil import parser
+from django.views.decorators.csrf import csrf_exempt
+from django.contrib import messages
+from urllib.parse import unquote
 from django.views.decorators.http import require_http_methods
+from django.db import connection as conn
+import psycopg2
+
+
+# Create your views here.
+
+#Untuk menyimpan data user login
+def loggedin_user(request):
+    return {
+        'username': request.session.get('username', None),
+        'error': request.session.get('error', False),
+    }
 
 def daftar_kontributor(request):
     try:
@@ -80,7 +99,6 @@ def daftar_kontributor(request):
 def langganan(request):
     try:
         cursor = conn.cursor()
-
         print(request.session.get('username'))
         #todo
         query = f"""SELECT distinct
@@ -110,55 +128,55 @@ def langganan(request):
         cursor.execute(query)
         paket_langganan_output = cursor.fetchall()
 
-        # #todo
-        # query = """
-        #     SELECT paket.nama, harga, resolusi_layar, string_agg(dukungan_perangkat, ', ')
-        #     FROM paket        
-        #     JOIN dukungan_perangkat ON paket.nama = dukungan_perangkat.nama_paket
-        #     GROUP BY paket.nama, harga, resolusi_layar;
-        # """
+        #todo
+        query = """
+            SELECT paket.nama, harga, resolusi_layar, string_agg(dukungan_perangkat, ', ')
+            FROM paket        
+            JOIN dukungan_perangkat ON paket.nama = dukungan_perangkat.nama_paket
+            GROUP BY paket.nama, harga, resolusi_layar;
+        """
 
-        # cursor.execute(query)
-        # paket_lain_output = cursor.fetchall()
+        cursor.execute(query)
+        paket_lain_output = cursor.fetchall()
 
-        # list_paket_lain = []
+        list_paket_lain = []
 
-        # for res in paket_lain_output:
-        #     list_paket_lain.append({  
-        #         "nama" : res[0],
-        #         "harga" : res[1],
-        #         "resolusi_layar": res[2],
-        #         "dukungan_perangkat": res[3]
-        #     })
+        for res in paket_lain_output:
+            list_paket_lain.append({  
+                "nama" : res[0],
+                "harga" : res[1],
+                "resolusi_layar": res[2],
+                "dukungan_perangkat": res[3]
+            })
         
-        # #todo
-        # query = f"""
-        # select 
-        # nama, transaction.start_date_time, transaction.end_date_time, metode_pembayaran, timestamp_pembayaran, sum(harga)
-        # from paket 
-        # join transaction on paket.nama = transaction.nama_paket
-        # join pengguna on transaction.username = {request.session.get('username')}
-        # group by nama, transaction.start_date_time, transaction.end_date_time, metode_pembayaran, timestamp_pembayaran;
-        # """
+        #todo
+        query = f"""
+        select 
+        nama, transaction.start_date_time, transaction.end_date_time, metode_pembayaran, timestamp_pembayaran, sum(harga)
+        from paket 
+        join transaction on paket.nama = transaction.nama_paket
+        join pengguna on transaction.username = {request.session.get('username')}
+        group by nama, transaction.start_date_time, transaction.end_date_time, metode_pembayaran, timestamp_pembayaran;
+        """
 
-        # cursor.execute(query)
-        # riwayat_transaksi_output = cursor.fetchall()
+        cursor.execute(query)
+        riwayat_transaksi_output = cursor.fetchall()
 
-        # list_riwayat_transaksi = []
+        list_riwayat_transaksi = []
 
-        # for res in riwayat_transaksi_output:
-        #     list_riwayat_transaksi.append({     
-        #         "nama_paket": res[0],
-        #         "tanggal_dimulai": res[1],
-        #         "tanggal_akhir": res[2],
-        #         "metode_pembayaran": res[3],
-        #         "tanggal_pembayaran": res[4],
-        #         "total_pembayaran" : res[5]
-        #     })
+        for res in riwayat_transaksi_output:
+            list_riwayat_transaksi.append({     
+                "nama_paket": res[0],
+                "tanggal_dimulai": res[1],
+                "tanggal_akhir": res[2],
+                "metode_pembayaran": res[3],
+                "tanggal_pembayaran": res[4],
+                "total_pembayaran" : res[5]
+            })
 
-        # cursor.execute()
+        cursor.execute()
 
-        # #send all data to html through context 
+        #send all data to html through context 
         # context = {
         #     'list_paket_langganan_aktif':list_paket_langganan_aktif,
         #     'list_paket_lain':list_paket_lain,
@@ -179,22 +197,22 @@ def langganan(request):
             "tanggal_akhir" : res[5]
         }
         for res in paket_langganan_output],
-        # 'list_paket_lain' : [{
-        #     "nama" : res[0],
-        #         "harga" : res[1],
-        #         "resolusi_layar": res[2],
-        #         "dukungan_perangkat": res[3]
-        # }
-        # for res in paket_lain_output],
-        # 'list_riwayat_transaksi' : [{
-        #     "nama_paket": res[0],
-        #     "tanggal_dimulai": res[1],
-        #     "tanggal_akhir": res[2],
-        #     "metode_pembayaran": res[3],
-        #     "tanggal_pembayaran": res[4],
-        #     "total_pembayaran" : res[5]
-        # }
-        # for res in riwayat_transaksi_output],
+        'list_paket_lain' : [{
+            "nama" : res[0],
+                "harga" : res[1],
+                "resolusi_layar": res[2],
+                "dukungan_perangkat": res[3]
+        }
+        for res in paket_lain_output],
+        'list_riwayat_transaksi' : [{
+            "nama_paket": res[0],
+            "tanggal_dimulai": res[1],
+            "tanggal_akhir": res[2],
+            "metode_pembayaran": res[3],
+            "tanggal_pembayaran": res[4],
+            "total_pembayaran" : res[5]
+        }
+        for res in riwayat_transaksi_output],
         }
         return render(request, "langganan.html", context)
 
@@ -212,7 +230,7 @@ def langganan(request):
             
 
 @require_http_methods(["GET","POST"])
-def halaman_beli(request):
+def halaman_beli(request, paket):
     if request.session.get('username') is not None:
         try:          
             if request.method == "GET":
@@ -220,20 +238,55 @@ def halaman_beli(request):
                 print(nama)
             cursor = conn.cursor()
             if request.method == "POST":
-                print()
+                package_name = paket
+                start_date = datetime.now()
+                end_date = start_date + datetime.timedelta(days=30)
+                payment_method = request.POST['payment_method']
+                connection = conn.get_db_connection()
+                cursor = conn.cursor()
+                cursor.execute(
+                    f"""select * from transaction where username = {request.session.get('username')}
+                    and end_date_time > '{datetime.now.strftime("%Y-%m-%d %H:%M:%S")}'
+                    """
+                )
+                langganan_aktif = cursor.fetchall() 
+                if len(langganan_aktif) == 0:
+                    cursor.execute(f"""
+                        insert into transaction(username, nama_paket, start_date_time, end_date_time, metode_pembayaran, timestamp_pembayaran) 
+                        values ('{request.session.get('username')}', '{package_name}', '{start_date.strftime("%Y-%m-%d %H:%M:%S")}', 
+                        '{end_date.strftime("%Y-%m-%d %H:%M:%S")}', '{payment_method}', '{datetime.now.strftime("%Y-%m-%d %H:%M:%S")}')
+                    """)
+                else:
+                    cursor.execute(
+                    f"""
+                    update transaction
+                    set end_date_time = '{end_date.strftime("%Y-%m-%d %H:%M:%S")}'
+                    metode_pembayaran = '{payment_method}'
+                    timestamp_pembayaran = '{datetime.now.strftime("%Y-%m-%d %H:%M:%S")}'
+                    nama_paket = '{package_name}'
+                    where username='{request.session.get('username')}'
+                    and end_date_time > '{datetime.now.strftime("%Y-%m-%d %H:%M:%S")}'
+                    """
+                    ) 
             else:
                 cursor.execute(
-                    """
-                    
+                    f"""
+                    select p.nama, p.harga, p.resolusi_layar, string_agg(dukungan_perangkat) as perangkat
+                    from paket p join dukungan_perangkat d on p.nama=d.nama_paket
+                    where p.nama='{paket}'
+                    group by p.nama, p.harga, p.resolusi_layar
                     """
                 )
                 daftar_paket = cursor.fetchall()
-                list_paket_lain = [
-                    {
-                        
-                    }
-                ]
-                return render(request, 'main:langganan', {"list_paket_lain":list_paket_lain})
+                paket_lain = [
+                {
+                    "nama" : res[0],
+                    "harga" : res[1],
+                    "resolusi_layar" : res[2],
+                    "dukungan_perangkat" : res[3],
+                }
+                for res in daftar_paket]
+                return render(request, 'main:langganan', {"paket_lain":paket_lain})
             conn.commit()
             return redirect('main:langganan')
 
@@ -262,6 +315,21 @@ def show_home(request,context=None):
 def show_login(request):
     context = {}
 
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        login = connection.cursor()
+        login.execute(f"""
+            SELECT username, password, negara_asal
+            FROM pacilflix.pengguna
+            WHERE username = '{username}' AND password = '{password}';
+        """)
+        user = login.fetchall()
+        print(user)
+        if len(user) > 0:
+            request.session['username'] = user[0][0] #PENTING BGT SETIAP LOGIN USERNAMENYA DISIMPEN DI SESSION
+            return HttpResponseRedirect(reverse("main:show_tayangan"))
+
     return render(request, "login.html", context)
 
 def show_register(request):
@@ -270,14 +338,154 @@ def show_register(request):
     return render(request, "register.html", context)
 
 def daftar_unduhan(request):
-    context = {}
+    unduhan_user = connection.cursor()
+    unduhan_user.execute(f"""
+        SELECT t.judul, tt.timestamp
+        FROM pacilflix.tayangan_terunduh as tt
+        LEFT JOIN pacilflix.tayangan as t on tt.id_tayangan = t.id
+        WHERE tt.username = '{request.session.get('username', None)}'; 
+    """)
+
+    context = {
+        'daftar_unduhan': unduhan_user.fetchall(),
+    }
 
     return render(request, "daftar_unduhan.html", context)
 
+def delete_unduhan(request):
+    if request.method == 'DELETE':
+        judul = json.loads(request.body).get('judul')
+        try:
+            delete = connection.cursor()
+            delete.execute(f"""
+                DELETE FROM pacilflix.tayangan_terunduh
+                WHERE id_tayangan IN (
+                    SELECT id
+                    FROM pacilflix.tayangan
+                    WHERE judul = '{judul}'
+                ) AND username = '{request.session.get('username', None)}';
+                """)
+            return HttpResponse(b"DELETED", 201)
+        except Exception:
+            request.session['error'] = "Tayangan minimal harus berada di daftar unduhan selama 1 hari agar bisa dihapus."
+            return HttpResponseRedirect(reverse("main:daftar_unduhan"))
+    
+    return HttpResponseNotFound()
+
+def tambah_unduhan(request):
+    if request.method == 'POST':
+        username = request.session.get('username', None)
+        judul = request.POST.get('judul')
+        cursor = connection.cursor()
+        cursor.execute(f"""
+            INSERT INTO pacilflix.tayangan_terunduh (id_tayangan, username, timestamp)
+            SELECT t.id, '{username}', CURRENT_TIMESTAMP
+            FROM pacilflix.tayangan t
+            WHERE t.judul = '{judul}'
+            AND NOT EXISTS (
+                SELECT 1
+                FROM pacilflix.tayangan_terunduh tt
+                WHERE tt.id_tayangan = t.id
+                AND tt.username = '{username}'
+            );
+        """)
+        messages.success(request, f'Selamat! Anda telah berhasil mengunduh {judul} dan akan berlaku hingga [current time + 7 hari]. Cek informasi selengkapnya pada halaman daftar unduhan.')
+        return HttpResponseRedirect(reverse('main:show_tayangan'))
+    return HttpResponseNotFound()
+
+@csrf_exempt
+def clear_error(request):
+    if request.method == 'POST':
+        request.session['error'] = False  
+        return redirect('main:daftar_unduhan')
+    return HttpResponseNotAllowed(['POST'])
+
 def daftar_favorit(request):
-    context = {}
+    favorit_user = connection.cursor()
+    favorit_user.execute(f"""
+        SELECT df.judul, df.timestamp
+        FROM pacilflix.daftar_favorit as df
+        WHERE df.username = '{request.session.get('username', None)}'; 
+    """)
+
+    context = {
+        'daftar_favorit': favorit_user.fetchall(),
+    }
 
     return render(request, "daftar_favorit.html", context)
+
+def delete_daftar_favorit(request):
+    if request.method == 'DELETE':
+        judul = json.loads(request.body).get('judul')
+        delete = connection.cursor()
+        delete.execute(f"""
+            DELETE FROM pacilflix.daftar_favorit
+            WHERE judul = '{judul}' AND username = '{request.session.get('username', None)}';
+        """)
+        #"2023-12-15 22:03:55"
+        return HttpResponse(b"DELETED", 201)
+    
+    return HttpResponseNotFound()
+
+def isi_daftar_favorit(request, judul):
+    judul = unquote(judul)
+    favorite = connection.cursor()
+    favorite.execute(f"""
+        SELECT t.judul, df.judul as daftar_favorit, tdf.timestamp
+        FROM pacilflix.daftar_favorit as df
+        JOIN pacilflix.tayangan_memiliki_daftar_favorit as tdf
+        ON df.username = tdf.username AND df.timestamp = tdf.timestamp
+        LEFT JOIN pacilflix.tayangan as t
+        ON t.id = tdf.id_tayangan
+        WHERE df.username = '{request.session.get('username')}' AND df.judul = '{judul}';
+    """)
+
+    context = {
+        'judul': judul,
+        'favorites': favorite.fetchall(),
+    }
+
+    return render(request, "isi_daftar_favorit.html", context)
+
+def delete_dari_favorit(request):
+    if request.method == 'DELETE':
+        nama_playlist = json.loads(request.body).get('nama')
+        judul = json.loads(request.body).get('judul')
+        delete = connection.cursor()
+        delete.execute(f"""
+            DELETE FROM pacilflix.tayangan_memiliki_daftar_favorit AS tdf
+            USING pacilflix.daftar_favorit AS df, pacilflix.tayangan AS t
+            WHERE tdf.username = df.username AND tdf.timestamp = df.timestamp
+            AND t.id = tdf.id_tayangan
+            AND df.username = '{request.session.get('username')}'
+            AND t.judul = '{judul}'
+            AND df.judul = '{nama_playlist}';
+        """)
+        return HttpResponse(b"DELETED", 201)
+    
+    return HttpResponseNotFound()
+
+def add_to_favorit(request):
+    if request.method == 'POST':
+        judul = request.POST.get('judul_tayangan')
+        daftar_favorit = request.POST.get('daftar_favorit')
+        print(judul)
+        print(daftar_favorit)
+        cursor = connection.cursor()
+        cursor.execute(f"""
+            INSERT INTO pacilflix.TAYANGAN_MEMILIKI_DAFTAR_FAVORIT (id_tayangan, timestamp, username)
+            SELECT 
+                (SELECT t.id
+                FROM pacilflix.tayangan AS t
+                WHERE t.judul = '{judul}'),
+                (SELECT df.timestamp
+                FROM pacilflix.daftar_favorit AS df
+                WHERE df.judul = '{daftar_favorit}'),
+                '{request.session.get('username')}';
+        """)
+        return show_tayangan(request)
+    
+    return HttpResponseNotFound()
 
 def show_trailer(request):
 
@@ -287,7 +495,7 @@ def show_trailer(request):
 
     return render(request, 'daftar_tayangan.html', context)
 
-def show_tayangan(request, id_tayangan, id_tayangan):
+def show_tayangan(request, id_tayangan):
     tayangan_type = 'Unknown'
     with conn.cursor() as cursor:
         cursor.execute("SELECT * FROM tayangan WHERE id = %s", [id_tayangan])
@@ -385,7 +593,7 @@ def show_tayangan(request, id_tayangan, id_tayangan):
         sutradara = "The director has not been defined"
     else:
         sutradara = sutradara[0]
-                      tayangan_type = 'Unknown'
+        tayangan_type = 'Unknown'
     with conn.cursor() as cursor:
         cursor.execute("SELECT * FROM tayangan WHERE id = %s", [id_tayangan])
         tayangan = cursor.fetchone()
