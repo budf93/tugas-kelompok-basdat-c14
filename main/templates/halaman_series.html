@@ -8,80 +8,89 @@
 {% block content %}
 
 <body>
-    <!-- Uncomment sesuai kebutuhan-->
     <h1>HALAMAN SERIES</h1>
-    <!-- <h1>HALAMAN FILM</h1> -->
-    <h2>Judul: {{ tayangan.0.0 }}</h2>
-    <!-- Uncomment jika series-->
+    <h2>Judul: {{ judul }}</h2>
     <h4>Episode:</h2>
-    <ul>
-        <li><a href="{% url 'main:show_episode' %}">Episode 1</a></li>
-        <li><a href="{% url 'main:show_episode' %}">Episode 2</a></li>
-        <li><a href="{% url 'main:show_episode' %}">Episode 3</a></li>
-    </ul> 
+    {% if haveEpisodes %}
+        <ul>
+        {% for e in episodes %}
+        <!-- TODO GIVE LINKS -->
+            <li><a href="{% url 'main:show_episode' id_tayangan=e.0 judul=judul sub_judul=e.1 %}">{{ e.1 }}</a></li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <p>{{ episodes }}</p>
+    {% endif %}
 
-    <button>Tonton</button>
-    <form method="POST" action="{% url 'main:tambah_unduhan' %}">
-        {% csrf_token %}
-        <input type="hidden" name="judul" value="{{ tayangan.0.0 }}">
-        <button type="submit" >Unduh Tayangan</button>
-    </form>
+    <button data-bs-toggle="modal" data-bs-target="#unduhModal">Unduh Tayangan</button>
 
     <button data-bs-toggle="modal" data-bs-target="#favoritModal">Favorit Tayangan</button>
 
-    <p>Total View: data</p>
-    <p>Rating Rata-Rata: data</p>
-    <p>Sinopsis: data</p>
-    <p>Durasi Film: data</p>
-    <p>Tanggal Rilis Film: data</p>
-    <p>URL Film: data</p>
+    <p>Total View: {{ total_view }}</p>
+    <p>Rating Rata-Rata: {{ avg_rating }}</p>
+    <p>Sinopsis: {{ sinopsis }}</p>
 
     <h3>Genre:</h3>
-    <ul>
-        <li>nama_genre_1</li>
-        <li>nama_genre_2</li>
-        <li>nama_genre_3</li>
-    </ul>
+    {% if haveGenres %}
+        <ul>
+        {% for g in genre %}
+            <li>{{ g.0 }}</li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <p>{{ genre }}</p>
+    {% endif %}
 
-    <h3>Asal Negara: data</h3>
+    <h3>Asal Negara: {{ asal_negara }}</h3>
 
     <h3>Pemain:</h3>
-    <ul>
-        <li>nama_pemain_1</li>
-        <li>nama_pemain_2</li>
-        <li>nama_pemain_3</li>
-    </ul>
+    {% if haveActors %}
+        <ul>
+        {% for a in actors %}
+            <li>{{ a.0 }}</li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <p>{{ actors }}</p>
+    {% endif %}
 
     <h3>Penulis Skenario:</h3>
-    <ul>
-        <li>nama_penulis_skenario_1</li>
-        <li>nama_penulis_skenario_2</li>
-        <li>nama_penulis_skenario_3</li>
-    </ul>
+    {% if haveWriters %}
+        <ul>
+        {% for w in writers %}
+            <li>{{ w.0 }}</li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <p>{{ writers }}</p>
+    {% endif %}
 
-    <h3>Sutradara: data</h3>
+    <h3>Sutradara: {{ sutradara }}</h3>
 
     <h3>Bagian Ulasan</h3>
 
-    <form action="" method="post">
+    <form action="{% url 'main:insert_ulasan' %}" method="post">
         {% csrf_token %}
+        <input type="hidden" name="id_tayangan_post" value="{{ id }}">
         <textarea name="review_text" placeholder="Input untuk deskripsi ulasan"></textarea>
-        <input type="number" name="rating" min="1" max="5" placeholder="rating yang diberikan">
+        <input type="number" name="rating" min="1" max="5" placeholder="rating yang diberikan" required>
         <button type="submit">Submit</button>
     </form>
     
     <h4>Daftar Ulasan:</h4>
     <ul>
-        <li>
-            <p>Username: data</p>
-            <p>Deskripsi: data</p>
-            <p>Rating: data</p>
-        </li>
-        <li>
-            <p>Username: data</p>
-            <p>Deskripsi: data</p>
-            <p>Rating: data</p>
-        </li>
+        {% if haveUlasan %}
+            {% for review in ulasan %}
+            <li>
+                <p>Username: {{ review.1 }}</p>
+                <p>Diulas pada: {{ review.2 }}</p>
+                <p>Deskripsi: {{ review.4 }}</p>
+                <p>Rating: {{ review.3 }}</p>
+            </li>
+            {% endfor %}
+        {% else %}
+            <p>{{ ulasan }}</p>
+        {% endif %}
     </ul>
 
     <div class="modal fade" id="unduhModal" tabindex="-1" role="dialog" aria-labelledby="unduhModalLabel" aria-hidden="true">
@@ -130,7 +139,9 @@
             </div>
         </div>
     </div>
+    
 </body>
+
 {% if messages %}
 <script>
   document.addEventListener('DOMContentLoaded', function() {

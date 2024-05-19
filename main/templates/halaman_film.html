@@ -1,0 +1,213 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block meta %}
+<title>Halaman Film</title>
+{% endblock meta %}
+
+{% block content %}
+
+<body>
+    <h1>HALAMAN FILM</h1>
+    <h2>Judul: {{ judul }}</h2>
+
+    <!-- TODO IMPLEMENT -->
+    {% now "Y-m-d" as today %}
+    {% if today >= release_date_film %}
+        <label for="progress">Progress:</label>
+        <button id="toggleButton">Tonton</button>
+        <input type="range" min="0" max="100" value="0" id="movieSlider">
+        <p id="sliderPosition">0 %</p>
+        <script>
+            var slider = document.getElementById("movieSlider");
+            var output = document.getElementById("sliderPosition");
+            slider.oninput = function() {
+                output.innerHTML = this.value + " %";
+            }
+        </script>
+    {% endif %}
+    
+    <button data-bs-toggle="modal" data-bs-target="#unduhModal">Unduh Tayangan</button>
+
+    <button data-bs-toggle="modal" data-bs-target="#favoritModal">Favorit Tayangan</button>
+
+    <p>Total View: {{ total_view }}</p>
+    <p>Rating Rata-Rata: {{ avg_rating }}</p>
+    <p>Sinopsis: {{ sinopsis }}</p>
+    <p>Durasi Film: {{ durasi_film }} menit</p>
+    <p>Tanggal Rilis Film: {{ release_date_film }}</p>
+    <p>URL Film: <a href="{{ url_video_film }}">{{ url_video_film }}</a></p>
+
+    <h3>Genre:</h3>
+    {% if haveGenres %}
+        <ul>
+        {% for g in genre %}
+            <li>{{ g.0 }}</li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <p>{{ genre }}</p>
+    {% endif %}
+
+    <h3>Asal Negara: {{ asal_negara }}</h3>
+
+    <h3>Pemain:</h3>
+    {% if haveActors %}
+        <ul>
+        {% for a in actors %}
+            <li>{{ a.0 }}</li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <p>{{ actors }}</p>
+    {% endif %}
+
+    <h3>Penulis Skenario:</h3>
+    {% if haveWriters %}
+        <ul>
+        {% for w in writers %}
+            <li>{{ w.0 }}</li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <p>{{ writers }}</p>
+    {% endif %}
+
+    <h3>Sutradara: {{ sutradara }}</h3>
+
+    <h3>Bagian Ulasan</h3>
+
+    <form action="{% url 'main:insert_ulasan' %}" method="post">
+        {% csrf_token %}
+        <input type="hidden" name="id_tayangan_post" value="{{ id }}">
+        <textarea name="review_text" placeholder="Input untuk deskripsi ulasan"></textarea>
+        <input type="number" name="rating" min="1" max="5" placeholder="rating yang diberikan" required>
+        <button type="submit">Submit</button>
+    </form>
+    
+    <h4>Daftar Ulasan:</h4>
+    <ul>
+        {% if haveUlasan %}
+            {% for review in ulasan %}
+            <li>
+                <p>Username: {{ review.1 }}</p>
+                <p>Diulas pada: {{ review.2 }}</p>
+                <p>Deskripsi: {{ review.4 }}</p>
+                <p>Rating: {{ review.3 }}</p>
+            </li>
+            {% endfor %}
+        {% else %}
+            <p>{{ ulasan }}</p>
+        {% endif %}
+    </ul>
+
+    <div class="modal fade" id="unduhModal" tabindex="-1" role="dialog" aria-labelledby="unduhModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="unduhModalLabel">SUKSES MENAMBAHKAN TAYANGAN KE DAFTAR UNDUHAN
+                        </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    Selamat! Anda telah berhasil mengunduh [Judul Tayangan] dan akan
+                    berlaku hingga [current time + 7 hari]. Cek informasi selengkapnya
+                    pada halaman daftar unduhan.
+                </div>
+                <div class="modal-footer">
+                    <a class="btn btn-primary">Daftar Unduhan</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="favoritModal" tabindex="-1" role="dialog" aria-labelledby="favoritModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="favoritModalLabel">TAMBAH KE DAFTAR FAVORIT MODAL</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form method="POST" action="{% url 'main:add_to_favorit' %}">
+                    {% csrf_token %}
+                    <div class="modal-body">
+                        <span>Judul Daftar Favorit:</span>
+                        <input type="hidden" name="judul_tayangan" value="{{ tayangan.0.0 }}">
+                        <select id="favoriteDropdown" name="daftar_favorit">
+                            <option value="">Pilih Daftar Favorit</option>
+                            {% for favorit in daftar_favorit %}
+                                <option value="{{ favorit.0 }}">{{ favorit.0 }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit">Tambah</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+</body>
+{% if messages %}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    var myModal = new bootstrap.Modal(document.getElementById('downloadSuccessModal'));
+    myModal.show();
+  });
+</script>
+{% endif %}
+
+<div class="modal fade" id="downloadSuccessModal" tabindex="-1" role="dialog" aria-labelledby="modalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalLabel">SUKSES MENAMBAHKAN TAYANGAN KE DAFTAR UNDUHAN</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                {% for message in messages %}
+                    <p>{{ message }}</p>
+                {% endfor %}
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <a type="button" class="btn btn-primary" href="{% url 'main:daftar_unduhan' %}">Daftar Unduhan</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- TODO IMPLEMENT -->
+<script>
+    let isWatching = false;
+    let startSliderPosition = 0;
+    let startTime = null;
+
+    document.getElementById('toggleButton').addEventListener('click', function() {
+        const slider = document.getElementById('movieSlider');
+        const id_tayangan = document.querySelector('input[name="id_tayangan_post"]').value;  // Get id_tayangan
+        if (!isWatching) {
+            // Start watching
+            this.innerText = 'Stop';
+            startSliderPosition = slider.value;
+            startTime = new Date().toISOString().slice(0, 19).replace('T', ' ');  // Capture start time
+        } else {
+            // Stop watching
+            this.innerText = 'Tonton';
+            const endSliderPosition = slider.value;
+
+            // Call Django view with AJAX
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', '/compute_riwayat_nonton/', true);
+            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+            xhr.setRequestHeader('X-CSRFToken', '{{ csrf_token }}');  // Django CSRF token
+            xhr.send(`start=${startSliderPosition}&end=${endSliderPosition}&startTime=${startTime}&id_tayangan=${id_tayangan}`);
+
+            startTime = null;  // Reset start time
+        }
+        isWatching = !isWatching;
+    });
+</script>
+
+{% endblock content %}
