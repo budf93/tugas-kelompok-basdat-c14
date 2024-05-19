@@ -6,6 +6,7 @@ from django.http import (HttpResponse, HttpResponseNotFound, HttpResponseRedirec
 from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
+import psycopg2
 
 # Create your views here.
 

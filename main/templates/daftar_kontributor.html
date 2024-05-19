@@ -28,18 +28,14 @@
       </tr>
     </thead>
     <tbody>
-      <tr>
-        <td class="border">Udin</td>
-        <td class="border">Sutradara</td>
-        <td class="border">Laki-Laki</td>
-        <td class="border">Amerika Serikat</td>
-      </tr>
-      <tr>
-          <td class="border">Asep</td>
-          <td class="border">Pemain</td>
-          <td class="border">Laki-Laki</td>
-          <td class="border">Britania Raya</td>
-      </tr>
+      {% for kontributor in kontributor_list %}
+        <tr>
+          <td class="border">{{ kontributor.nama }}</td>
+          <td class="border">{{ kontributor.tipe }}</td>
+          <td class="border">{{ kontributor.jenis_kelamin }}</td>
+          <td class="border">{{ kontributor.kewarganegaraan }}</td>
+        </tr>
+      {% endfor %}
     </tbody>
   </table>
 </div>
