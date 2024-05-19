@@ -11,6 +11,7 @@ from urllib.parse import unquote
 from django.views.decorators.http import require_http_methods
 from django.db import connection as conn
 import psycopg2
+from datetime import datetime, timedelta
 
 
 # Create your views here.
@@ -227,68 +228,76 @@ def langganan(request):
 
 @require_http_methods(["GET","POST"])
 def halaman_beli(request, paket):
-    paket_lain = []
+    list_metode_pembayaran=['Transfer Bank','Kartu Kredit','E-Wallet']
     if request.session.get('username') is not None:
         try:          
-            if request.method == "GET":
-                nama = request.GET.get('nama')
-                # print(nama)
             cursor = conn.cursor()
             if request.method == "POST":
-                package_name = paket
-                start_date = datetime.now()
-                end_date = start_date + datetime.timedelta(days=30)
-                payment_method = request.POST['payment_method']
-                connection = conn.get_db_connection()
-                cursor = conn.cursor()
-                cursor.execute(
-                    f"""select * from transaction where username = {request.session.get('username')}
-                    and end_date_time > '{datetime.now.strftime("%Y-%m-%d %H:%M:%S")}'
-                    """
-                )
-                langganan_aktif = cursor.fetchall() 
-                if len(langganan_aktif) == 0:
-                    cursor.execute(f"""
-                        insert into transaction(username, nama_paket, start_date_time, end_date_time, metode_pembayaran, timestamp_pembayaran) 
-                        values ('{request.session.get('username')}', '{package_name}', '{start_date.strftime("%Y-%m-%d %H:%M:%S")}', 
-                        '{end_date.strftime("%Y-%m-%d %H:%M:%S")}', '{payment_method}', '{datetime.now.strftime("%Y-%m-%d %H:%M:%S")}')
-                    """)
-                else:
-                    cursor.execute(
-                    f"""
-                    update transaction
-                    set end_date_time = '{end_date.strftime("%Y-%m-%d %H:%M:%S")}'
-                    metode_pembayaran = '{payment_method}'
-                    timestamp_pembayaran = '{datetime.now.strftime("%Y-%m-%d %H:%M:%S")}'
-                    nama_paket = '{package_name}'
-                    where username='{request.session.get('username')}'
-                    and end_date_time > '{datetime.now.strftime("%Y-%m-%d %H:%M:%S")}'
-                    """
-                    ) 
-            else:
-                # print(paket)
-                cursor.execute(
-                    f"""
-                    select p.nama, p.harga, p.resolusi_layar, string_agg(dukungan_perangkat, ', ') as perangkat
-                    from paket p join dukungan_perangkat d on p.nama=d.nama_paket
-                    where p.nama='{paket}'
-                    group by p.nama, p.harga, p.resolusi_layar
-                    """
-                )
-                daftar_paket = cursor.fetchall()
-                paket_lain = [
-                {
-                    "nama" : res[0],
-                    "harga" : res[1],
-                    "resolusi_layar" : res[2],
-                    "dukungan_perangkat" : res[3],
-                }
-                for res in daftar_paket]
+                paket_lain_list=[]
+                print(request.POST)
+                print(request.POST.get("BuyStatus"))
+                if(request.POST.get("BuyStatus") is not None):
                 
-                # print(paket_lain[0]['resolusi_layar'])
-                print(paket_lain)
-                return render(request, 'halaman_beli.html', {'paket_lain':paket_lain})
-            conn.commit()
+                    package_name = paket
+                    username = request.session.get('username')
+                    payment_method = request.POST['payment_method']
+                    cursor.execute(
+                        f"""select * from transaction where username = {request.session.get('username')}
+                        and end_date_time > CURRENT_TIMESTAMP
+                        """
+                    )
+                    langganan_aktif = cursor.fetchall() 
+                    if len(langganan_aktif) == 0:
+                        # Insert new transaction
+                        cursor.execute(
+                            """
+                            INSERT INTO transaction (username, nama_paket, start_date_time, end_date_time, metode_pembayaran, timestamp_pembayaran) 
+                            VALUES (%s, %s, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP + interval '30 days', %s, CURRENT_TIMESTAMP)
+                            """,
+                            (username, package_name, payment_method)
+                        )
+                    else:
+                        # Update existing transaction
+                        cursor.execute(
+                            """
+                            UPDATE transaction
+                            SET end_date_time = CURRENT_TIMESTAMP + interval '30 days',
+                                metode_pembayaran = %s,
+                                timestamp_pembayaran = CURRENT_TIMESTAMP,
+                                nama_paket = %s
+                            WHERE username = %s
+                            AND end_date_time > CURRENT_TIMESTAMP
+                            """,
+                            (payment_method, package_name, username)
+                        )
+                    
+                else:
+                
+                    cursor.execute(
+                        f"""
+                        select p.nama, p.harga, p.resolusi_layar, string_agg(dukungan_perangkat, ', ') as perangkat
+                        from paket p join dukungan_perangkat d on p.nama=d.nama_paket
+                        where p.nama='{paket}'
+                        group by p.nama, p.harga, p.resolusi_layar
+                        """
+                    )
+                    daftar_paket = cursor.fetchall()
+
+                    print(daftar_paket)
+                    print(list_metode_pembayaran)
+                    # for res in daftar_paket:
+                    #     paket_lain = {
+                    #         "nama": res[0],
+                    #         "harga": res[1],
+                    #         "resolusi_layar": res[2],
+                    #         "dukungan_perangkat": res[3],
+                    #     }
+                    #     paket_lain_list.append(paket_lain)
+                    
+                    
+                    return render(request, 'halaman_beli.html', {'paket_lain':daftar_paket, 'list_metode_pembayaran': list_metode_pembayaran})
+                conn.commit()
+        
 
         except (Exception, psycopg2.Error) as error:
             print("Error while fetching data from PostgreSQL", error)
@@ -302,7 +311,7 @@ def halaman_beli(request, paket):
     else:
         print(redirect('main:show_login'))
 
-    return render(request, 'langganan.html', {'paket_lain':paket_lain[0]})
+    return render(request, 'langganan.html', {'paket_lain':paket_lain_list})
 
 def show_home(request,context=None):
     print(context)

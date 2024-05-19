@@ -42,17 +42,26 @@
         </tr>
         </thead>
         <tbody>
-        {% for paket_lain in list_paket_lain %}
+            {% for paket_lain in list_paket_lain %}
+        
             <tr>
-                <td class="border">{{ paket_lain.0 }}</td> 
-                <td class="border">{{ paket_lain.1 }}</td>
-                <td class="border">{{ paket_lain.2 }}</td>
-                <td class="border">{{ paket_lain.3 }}</td>
+                <td class="border">{{ paket_lain.nama }}</td>
+                <td class="border">{{ paket_lain.harga }}</td>
+                <td class="border">{{ paket_lain.resolusi_layar }}</td>
+                <td class="border">{{ paket_lain.dukungan_perangkat }}</td>
                 <td class="border">
-                    <a class="btn btn-primary" href="{% url 'main:halaman_beli' paket_lain.nama%}" role="button">Beli</a>
+                    <form method="POST" action="{% url 'main:halaman_beli' paket_lain.nama %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="paket_nama" value="{{ paket_lain.nama }}">
+                        <input type="hidden" name="paket_harga" value="{{ paket_lain.harga }}">
+                        <input type="hidden" name="paket_resolusi_layar" value="{{ paket_lain.resolusi_layar }}">
+                        <input type="hidden" name="paket_dukungan_perangkat" value="{{ paket_lain.dukungan_perangkat }}">
+                        <button type="submit" class="btn btn-primary">Beli</button>
+                    </form>
                 </td>
             </tr>
-        {% endfor %}
+           
+            {% endfor %}
         </tbody>
     </table>
     <p>Riwayat Transaksi:</p>
