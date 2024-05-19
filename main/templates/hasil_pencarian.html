@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block meta %}
+<title>Daftar Tayangan</title>
+{% endblock meta %}
+
+{% block content %}
+
+
+<body>
+    <div class="container">
+        <!-- TODO search -->
+        <form action="{% url 'main:search_tayangan' %}" method="get">
+            <input type="text" id="search" name="title" value="{{ title }}">
+            <input type="submit" value="Search">
+        </form>
+        <div id="searchResults">
+            <h2>HASIL PENCARIAN</h2>
+            <!-- Repeat this section for each search result -->
+            <table>
+                <tr>
+                    <th>Judul</th>
+                    <th>Sinopsis Trailer</th>
+                    <th>URL Trailer</th>
+                    <th>Tanggal Rilis Trailer</th>
+                    {% if displayTombol %}<th>Tayangan</th>{% endif %}
+                </tr>
+                <!-- Repeat this row for each item in the list -->
+                {% for show in shows %}
+                <tr>
+                    <td>{{ show.1 }}</td>
+                    <td>{{ show.2 }}</td>
+                    <td>{{ show.3 }}</td>
+                    <td>{{ show.4 }}</td>
+                    {% if displayTombol %}<td><a href="{% url 'main:show_tayangan' show.0 %}" class="btn">Lihat Tayangan</a></td>{% endif %}
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+    </div>
+</body>
+
+<style>
+    label {
+        margin-right: 10px;
+        /* Adjust the margin-right value as needed */
+    }
+
+    /* Add spacing between table rows */
+    table tr {
+        margin-bottom: 10px;
+        /* Adjust the margin-bottom value as needed */
+        border-collapse: collapse;
+    }
+
+    table {
+        margin: auto;
+    }
+
+    th,
+    td {
+        text-align: center;
+        /* Center the text in the table headers and cells */
+        padding: 10px;
+        /* Add some padding around the text */
+        border: 1px solid black;
+    }
+
+    body {
+        text-align: center;
+    }
+
+    .btn {
+        display: inline-block;
+        padding: 10px 20px;
+        color: #fff;
+        background-color: #007bff;
+        border: none;
+        border-radius: 5px;
+        text-decoration: none;
+        text-align: center;
+        cursor: pointer;
+    }
+</style>
+
+{% endblock content %}
