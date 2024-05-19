@@ -102,9 +102,9 @@ def daftar_unduhan(request):
             WHERE tt.username = '{request.session.get('username', None)}'; 
         """)
 
-    context = {
-        'daftar_unduhan': unduhan_user.fetchall(),
-    }
+        context = {
+            'daftar_unduhan': unduhan_user.fetchall(),
+        }
 
     return render(request, "daftar_unduhan.html", context)
 
@@ -160,9 +160,9 @@ def daftar_favorit(request):
             WHERE df.username = '{request.session.get('username', None)}'; 
         """)
 
-    context = {
-        'daftar_favorit': favorit_user.fetchall(),
-    }
+        context = {
+            'daftar_favorit': favorit_user.fetchall(),
+        }
 
     return render(request, "daftar_favorit.html", context)
 
@@ -194,10 +194,10 @@ def isi_daftar_favorit(request, judul):
             WHERE df.username = '{request.session.get('username')}' AND df.judul = '{judul}';
         """)
 
-    context = {
-        'judul': judul,
-        'favorites': favorite.fetchall(),
-    }
+        context = {
+            'judul': judul,
+            'favorites': favorite.fetchall(),
+        }
 
     return render(request, "isi_daftar_favorit.html", context)
 
