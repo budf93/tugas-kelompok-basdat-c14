@@ -21,6 +21,35 @@ def login_required(view_func):
             return redirect('authentication:login')
     return _wrapped_view
 
+def check_package(view_func):
+    @wraps(view_func)
+    def _wrapped_view(request, *args, **kwargs):
+        if check_active_package(request):
+            return view_func(request, *args, **kwargs)
+        else:
+            return redirect('main:langganan')
+    return _wrapped_view
+
+def check_active_package(request):
+    displayTombol = False
+    if "username" in request.session:
+        with conn.cursor() as cursor:
+            now = datetime.now()
+
+            query = """
+                SELECT * FROM TRANSACTION
+                WHERE username = %s AND start_date_time <= %s AND end_date_time >= %s
+            """
+
+            cursor.execute(query, (request.session["username"], now, now))
+
+            result = cursor.fetchone()
+
+            if result is not None:
+                displayTombol = True
+
+    return displayTombol
+
 def daftar_kontributor(request):
     context = {
     }
@@ -67,12 +96,117 @@ def daftar_favorit(request):
 
     return render(request, "daftar_favorit.html", context)
 
+def search_tayangan(request):
+    title = request.GET.get('title', '')
+    
+    if not title:
+        return redirect('main:show_daftar_tayangan')
+    
+    with conn.cursor() as cursor:
+        cursor.execute("SET search_path TO extensions")
+        cursor.execute("SELECT id, judul, sinopsis_trailer, url_video_trailer, release_date_trailer FROM tayangan WHERE judul ILIKE %s", ['%' + title + '%'])
+        shows = cursor.fetchall()
+
+    displayTombol = check_active_package(request)
+
+    context = {'shows': shows, 'displayTombol': displayTombol, 'title': title}
+
+    return render(request, 'hasil_pencarian.html', context)
+
 def show_daftar_tayangan(request):
+    with conn.cursor() as cursor:
+        cursor.execute("SET search_path TO extensions")
 
-    context = {
-        'user': request.user,
-    }
+        # Query for top 10 shows of the week
+        # Asumsi menggunakan start_date_time untuk menentukan jumlah viewsnya
+        cursor.execute("""
+            SELECT * FROM (
+                (SELECT id_tayangan, judul, sinopsis_trailer, url_video_trailer, release_date_trailer, views 
+                FROM (
+                    SELECT watch_sessions.id_tayangan, COUNT(*) as views
+                    FROM (
+                        SELECT 
+                            id_tayangan, 
+                            username, 
+                            EXTRACT(EPOCH FROM (end_date_time - start_date_time)) / 60 as watch_duration
+                        FROM RIWAYAT_NONTON
+                        WHERE start_date_time >= NOW() - INTERVAL '7 days'
+                    ) as watch_sessions
+                    JOIN film ON film.id_tayangan = watch_sessions.id_tayangan
+                    WHERE watch_duration >= (film.durasi_film * 0.7)
+                    GROUP BY watch_sessions.id_tayangan
+                ) as tayangan_views
+                JOIN tayangan on tayangan.id = tayangan_views.id_tayangan)
+                UNION ALL
+                (WITH durasi_series AS (
+                    SELECT 
+                        e.id_series,
+                        AVG(e.durasi) AS avg_duration
+                    FROM 
+                        EPISODE e
+                    GROUP BY 
+                        e.id_series
+                ),
+                watch_sessions AS (
+                    SELECT 
+                        id_tayangan, 
+                        username, 
+                        EXTRACT(EPOCH FROM (end_date_time - start_date_time)) / 60 as watch_duration
+                    FROM RIWAYAT_NONTON
+                    WHERE start_date_time >= NOW() - INTERVAL '7 days'
+                ),
+                total_watch_session AS (
+                    SELECT
+                        watch_sessions.id_tayangan,
+                        SUM(watch_sessions.watch_duration) as total_watch_duration
+                    FROM
+                        watch_sessions
+                    GROUP BY
+                        watch_sessions.id_tayangan
+                )
+                SELECT 
+                    total_watch_session.id_tayangan, 
+                    judul, 
+                    sinopsis_trailer, 
+                    url_video_trailer, 
+                    release_date_trailer,
+                    ceil(total_watch_session.total_watch_duration / durasi_series.avg_duration) as views
+                FROM
+                    total_watch_session
+                JOIN
+                    durasi_series
+                ON
+                    total_watch_session.id_tayangan = durasi_series.id_series
+                JOIN 
+                    tayangan
+                ON 
+                    tayangan.id = durasi_series.id_series)
+            ) AS combined_results
+            ORDER BY views DESC
+            LIMIT 10
+        """)
+        top_shows = cursor.fetchall()
 
+        # Query for all films
+        cursor.execute("""
+                    SELECT id, judul, sinopsis_trailer, url_video_trailer, 
+                    release_date_trailer 
+                    FROM film
+                    JOIN tayangan on id = id_tayangan""")
+        films = cursor.fetchall()
+
+        # Query for all series
+        cursor.execute("""
+                    SELECT id, judul, sinopsis_trailer, url_video_trailer, 
+                    release_date_trailer 
+                    FROM series
+                    JOIN tayangan on id = id_tayangan""")
+        series = cursor.fetchall()
+
+    displayTombol = check_active_package(request)
+    
+    # Pass the data to the template
+    context = {'films': films, 'series': series, 'top_shows': top_shows, 'displayTombol': displayTombol}
     return render(request, 'daftar_tayangan.html', context)
 
 @login_required
@@ -159,7 +293,9 @@ def insert_ulasan(request):
             conn.commit()
     return redirect('main:show_tayangan', id_tayangan=id_tayangan_post)
 
+# Asumsi page tayangan hanya bisa ditampilkan jika paket aktif
 @login_required
+@check_package
 def show_tayangan(request, id_tayangan):
     tayangan_type = 'Unknown'
     with conn.cursor() as cursor:
@@ -372,12 +508,15 @@ def show_tayangan(request, id_tayangan):
         context['durasi_film'] = film[3]
         return show_film(request, context)
 
+@login_required
 def show_film(request, context):
     return render(request, 'halaman_film.html', context)
 
+@login_required
 def show_series(request, context):
     return render(request, 'halaman_series.html', context)
 
+@login_required
 def show_episode(request, id_tayangan, judul, sub_judul):
     with conn.cursor() as episode:
         episode.execute("SET search_path TO extensions")
