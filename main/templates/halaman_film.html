@@ -27,7 +27,12 @@
         </script>
     {% endif %}
     
-    <button data-bs-toggle="modal" data-bs-target="#unduhModal">Unduh Tayangan</button>
+    <form method="POST" action="{% url 'main:tambah_unduhan' %}">
+        {% csrf_token %}
+        <input type="hidden" name="id_tayangan_unduhan" value="{{ id }}">
+        <input type="hidden" name="judul" value="{{ judul }}">
+        <button type="submit" >Unduh Tayangan</button>
+    </form>
 
     <button data-bs-toggle="modal" data-bs-target="#favoritModal">Favorit Tayangan</button>
 
@@ -132,7 +137,8 @@
                     {% csrf_token %}
                     <div class="modal-body">
                         <span>Judul Daftar Favorit:</span>
-                        <input type="hidden" name="judul_tayangan" value="{{ tayangan.0.0 }}">
+                        <input type="hidden" name="id_tayangan_favorit" value="{{ id }}">
+                        <input type="hidden" name="judul_tayangan" value="{{ judul }}">
                         <select id="favoriteDropdown" name="daftar_favorit">
                             <option value="">Pilih Daftar Favorit</option>
                             {% for favorit in daftar_favorit %}

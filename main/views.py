@@ -3,7 +3,7 @@ import math
 from django.utils import timezone
 from django.http import Http404
 from django.shortcuts import redirect, render
-from django.db import connection as conn
+from django.db import InternalError, connection as conn
 from django.views.decorators.csrf import csrf_exempt
 from functools import wraps
 import json
@@ -93,6 +93,7 @@ def show_register(request):
     return render(request, "register.html", context)
 
 def daftar_unduhan(request):
+    error = request.session.pop('error', None)
     with conn.cursor() as unduhan_user:
         unduhan_user.execute("SET search_path TO extensions")
         unduhan_user.execute(f"""
@@ -102,13 +103,15 @@ def daftar_unduhan(request):
             WHERE tt.username = '{request.session.get('username', None)}'; 
         """)
 
-    context = {
-        'daftar_unduhan': unduhan_user.fetchall(),
-    }
+        context = {
+            'daftar_unduhan': unduhan_user.fetchall(),
+        'error': error
+        }
 
     return render(request, "daftar_unduhan.html", context)
 
 def delete_unduhan(request):
+    error = request.session.pop('error', None)
     if request.method == 'DELETE':
         judul = json.loads(request.body).get('judul')
         try:
@@ -122,15 +125,19 @@ def delete_unduhan(request):
                         WHERE judul = '{judul}'
                     ) AND username = '{request.session.get('username', None)}';
                     """)
+                conn.commit()
             return HttpResponse(b"DELETED", 201)
-        except Exception:
+        except Exception as e:
+            print("error:", str(e))
             request.session['error'] = "Tayangan minimal harus berada di daftar unduhan selama 1 hari agar bisa dihapus."
-            return HttpResponseRedirect(reverse("main:daftar_unduhan"))
+            return render(request, 'daftar_unduhan.html', {'error': error})
     
     return HttpResponseNotFound()
 
 def tambah_unduhan(request):
     if request.method == 'POST':
+        id_tayangan = request.POST.get('id_tayangan_unduhan')
+        print(id_tayangan)
         username = request.session.get('username', None)
         judul = request.POST.get('judul')
         with conn.cursor() as cursor:
@@ -148,7 +155,7 @@ def tambah_unduhan(request):
                 );
             """)
         messages.success(request, f'Selamat! Anda telah berhasil mengunduh {judul} dan akan berlaku hingga [current time + 7 hari]. Cek informasi selengkapnya pada halaman daftar unduhan.')
-        return HttpResponseRedirect(reverse('main:show_tayangan'))
+        return HttpResponseRedirect(reverse('main:show_tayangan', args=(id_tayangan,)))
     return HttpResponseNotFound()
 
 def daftar_favorit(request):
@@ -160,9 +167,9 @@ def daftar_favorit(request):
             WHERE df.username = '{request.session.get('username', None)}'; 
         """)
 
-    context = {
-        'daftar_favorit': favorit_user.fetchall(),
-    }
+        context = {
+            'daftar_favorit': favorit_user.fetchall(),
+        }
 
     return render(request, "daftar_favorit.html", context)
 
@@ -194,10 +201,10 @@ def isi_daftar_favorit(request, judul):
             WHERE df.username = '{request.session.get('username')}' AND df.judul = '{judul}';
         """)
 
-    context = {
-        'judul': judul,
-        'favorites': favorite.fetchall(),
-    }
+        context = {
+            'judul': judul,
+            'favorites': favorite.fetchall(),
+        }
 
     return render(request, "isi_daftar_favorit.html", context)
 
@@ -222,24 +229,25 @@ def delete_dari_favorit(request):
 
 def add_to_favorit(request):
     if request.method == 'POST':
+        id_tayangan = request.POST.get('id_tayangan_favorit')
         judul = request.POST.get('judul_tayangan')
         daftar_favorit = request.POST.get('daftar_favorit')
-        print(judul)
-        print(daftar_favorit)
+        print(judul + "test")
+        print(daftar_favorit + "test")
         with conn.cursor() as cursor:
             cursor.execute("SET search_path TO extensions")
-            cursor.execute(f"""
+            cursor.execute("""
                 INSERT INTO TAYANGAN_MEMILIKI_DAFTAR_FAVORIT (id_tayangan, timestamp, username)
                 SELECT 
                     (SELECT t.id
                     FROM tayangan AS t
-                    WHERE t.judul = '{judul}'),
+                    WHERE t.judul = %s),
                     (SELECT df.timestamp
                     FROM daftar_favorit AS df
-                    WHERE df.judul = '{daftar_favorit}'),
-                    '{request.session.get('username')}';
-            """)
-        return show_tayangan(request)
+                    WHERE df.judul = %s),
+                    %s;
+            """, [judul, daftar_favorit, request.session.get('username')])
+        return show_tayangan(request, id_tayangan)
     
     return HttpResponseNotFound()
 
@@ -254,9 +262,10 @@ def search_tayangan(request):
         cursor.execute("SELECT id, judul, sinopsis_trailer, url_video_trailer, release_date_trailer FROM tayangan WHERE judul ILIKE %s", ['%' + title + '%'])
         shows = cursor.fetchall()
 
-    displayTombol = check_active_package(request)
+        
+        context = {'shows': shows, 'displayTombol': displayTombol, 'title': title}
 
-    context = {'shows': shows, 'displayTombol': displayTombol, 'title': title}
+    displayTombol = check_active_package(request)
 
     return render(request, 'hasil_pencarian.html', context)
 
@@ -431,13 +440,16 @@ def insert_ulasan(request):
         username = request.session.get('username')
         timestamp = timezone.now()  # Get the current time
 
-        with conn.cursor() as cursor:
-            cursor.execute("SET search_path TO extensions")
-            cursor.execute("""
-                INSERT INTO ULASAN (id_tayangan, username, timestamp, rating, deskripsi)
-                VALUES (%s, %s, %s, %s, %s)
-            """, [id_tayangan_post, username, timestamp, rating, deskripsi])
-            conn.commit()
+        try:
+            with conn.cursor() as cursor:
+                cursor.execute("SET search_path TO extensions")
+                cursor.execute("""
+                    INSERT INTO ULASAN (id_tayangan, username, timestamp, rating, deskripsi)
+                    VALUES (%s, %s, %s, %s, %s)
+                """, [id_tayangan_post, username, timestamp, rating, deskripsi])
+                conn.commit()
+        except InternalError as e:
+            return redirect('main:show_tayangan', id_tayangan=id_tayangan_post)
     return redirect('main:show_tayangan', id_tayangan=id_tayangan_post)
 
 # Asumsi page tayangan hanya bisa ditampilkan jika paket aktif
