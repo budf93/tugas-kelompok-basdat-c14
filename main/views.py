@@ -229,24 +229,25 @@ def delete_dari_favorit(request):
 
 def add_to_favorit(request):
     if request.method == 'POST':
+        id_tayangan = request.POST.get('id_tayangan_favorit')
         judul = request.POST.get('judul_tayangan')
         daftar_favorit = request.POST.get('daftar_favorit')
-        print(judul)
-        print(daftar_favorit)
+        print(judul + "test")
+        print(daftar_favorit + "test")
         with conn.cursor() as cursor:
             cursor.execute("SET search_path TO extensions")
-            cursor.execute(f"""
+            cursor.execute("""
                 INSERT INTO TAYANGAN_MEMILIKI_DAFTAR_FAVORIT (id_tayangan, timestamp, username)
                 SELECT 
                     (SELECT t.id
                     FROM tayangan AS t
-                    WHERE t.judul = '{judul}'),
+                    WHERE t.judul = %s),
                     (SELECT df.timestamp
                     FROM daftar_favorit AS df
-                    WHERE df.judul = '{daftar_favorit}'),
-                    '{request.session.get('username')}';
-            """)
-        return show_tayangan(request)
+                    WHERE df.judul = %s),
+                    %s;
+            """, [judul, daftar_favorit, request.session.get('username')])
+        return show_tayangan(request, id_tayangan)
     
     return HttpResponseNotFound()
 
