@@ -22,7 +22,12 @@
         <p>{{ episodes }}</p>
     {% endif %}
 
-    <button data-bs-toggle="modal" data-bs-target="#unduhModal">Unduh Tayangan</button>
+    <form method="POST" action="{% url 'main:tambah_unduhan' %}">
+        {% csrf_token %}
+        <input type="hidden" name="id_tayangan_unduhan" value="{{ id }}">
+        <input type="hidden" name="judul" value="{{ judul }}">
+        <button type="submit" >Unduh Tayangan</button>
+    </form>
 
     <button data-bs-toggle="modal" data-bs-target="#favoritModal">Favorit Tayangan</button>
 
