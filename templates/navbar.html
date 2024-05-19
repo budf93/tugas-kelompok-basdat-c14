@@ -3,11 +3,12 @@
 <nav class="navbar navbar-light bg-dark">
     <div class="container-fluid">
       <span class="navbar-brand mb-0 h1" style="color: aliceblue;">PacilFlix - C14</span>
-      <div>
       {% if request.session.logged_in %}
+      <p class="navbar-brand mb-0 h1" style="color: rgb(135, 222, 136);">=={{ request.session.username }}==</p>
+      <div>
+      
       <a class="navbar-brand" style="color: aliceblue;" href="{% url 'main:show_home' %}">Home</a>
-      <a class="navbar-brand" style="color: aliceblue;" href="{% url 'main:show_trailer' %}">Trailer</a>
-      <a class="navbar-brand" style="color: aliceblue;" href="{% url 'main:show_tayangan' %}">Tayangan</a>
+      <a class="navbar-brand" style="color: aliceblue;" href="{% url 'main:show_daftar_tayangan' %}">Daftar Tayangan</a>
       <a class="navbar-brand" style="color: aliceblue;" href="{% url 'main:daftar_kontributor' %}">Kontributor</a>
       <a class="navbar-brand" style="color: aliceblue;" href="{% url 'main:daftar_favorit' %}">Favorit</a>
       <a class="navbar-brand" style="color: aliceblue;" href="{% url 'main:daftar_unduhan' %}">Unduhan</a>
@@ -15,8 +16,9 @@
       <a class="navbar-brand" style="color: aliceblue;" href="{% url 'authentication:logout' %}">Logout</a>
 
       {% else %}
+      <div>
       <a class="navbar-brand" style="color: aliceblue;" href="{% url 'main:show_home' %}">Home</a>
-      <a class="navbar-brand" style="color: aliceblue;" href="{% url 'main:show_trailer' %}">Trailer</a>
+      <a class="navbar-brand" style="color: aliceblue;" href="{% url 'main:show_daftar_tayangan' %}">Daftar Trailer</a>
       <a class="navbar-brand" style="color: aliceblue;" href="{% url 'authentication:login' %}">Login</a>
 
       {% endif %}

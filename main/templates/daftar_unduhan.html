@@ -85,7 +85,7 @@
         <p>{{ error }}</p>
       </div>
       <div class="modal-footer">
-        <form method="post" action="{% url 'main:clear_error' %}">
+        <form method="post" action="">
             {% csrf_token %}
             <button type="submit" class="btn btn-danger" data-bs-dismiss="modal">
                 Tutup Modal
