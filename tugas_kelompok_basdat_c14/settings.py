@@ -42,15 +42,6 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-from django.contrib.messages import constants as messages
-MESSAGE_TAGS = {
-    messages.INFO: 'info',
-    messages.SUCCESS: 'success',
-    messages.WARNING: 'warning',
-    messages.ERROR: 'error',
-    messages.DEBUG: 'debug',
-}
-
 ROOT_URLCONF = 'tugas_kelompok_basdat_c14.urls'
 
 TEMPLATES = [
