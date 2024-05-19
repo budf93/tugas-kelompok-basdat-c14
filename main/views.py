@@ -262,10 +262,9 @@ def search_tayangan(request):
         cursor.execute("SELECT id, judul, sinopsis_trailer, url_video_trailer, release_date_trailer FROM tayangan WHERE judul ILIKE %s", ['%' + title + '%'])
         shows = cursor.fetchall()
 
-        
-        context = {'shows': shows, 'displayTombol': displayTombol, 'title': title}
-
     displayTombol = check_active_package(request)
+
+    context = {'shows': shows, 'displayTombol': displayTombol, 'title': title}
 
     return render(request, 'hasil_pencarian.html', context)
 
