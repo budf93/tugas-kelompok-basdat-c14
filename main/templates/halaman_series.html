@@ -129,7 +129,8 @@
                     {% csrf_token %}
                     <div class="modal-body">
                         <span>Judul Daftar Favorit:</span>
-                        <input type="hidden" name="judul_tayangan" value="{{ tayangan.0.0 }}">
+                        <input type="hidden" name="id_tayangan_favorit" value="{{ id }}">
+                        <input type="hidden" name="judul_tayangan" value="{{ judul }}">
                         <select id="favoriteDropdown" name="daftar_favorit">
                             <option value="">Pilih Daftar Favorit</option>
                             {% for favorit in daftar_favorit %}
