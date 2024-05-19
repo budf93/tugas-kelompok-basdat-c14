@@ -16,12 +16,12 @@
         </tr>
         </thead>
         <tbody>
-        {% for paket_lain in list_paket_lain %}
+        {% for paket in list_paket_lain %}
         <tr>
-            <td class="border">{{ paket_lain.nama }}</td>
-            <td class="border">{{ paket_lain.harga }}</td>
-            <td class="border">{{ paket_lain.resolusi.layar }}</td>
-            <td class="border">{{ paket_lain.dukungan_perangkat }}</td>
+            <td class="border">{{ paket.nama }}</td>
+            <td class="border">{{ paket.harga }}</td>
+            <td class="border">{{ paket.resolusi.layar }}</td>
+            <td class="border">{{ paket.dukungan_perangkat }}</td>
         </tr>
         {% endfor %}
         </tbody>
@@ -38,7 +38,7 @@
         {% endfor %}
     </ul>
     <div class="col-md-12 text-center">
-        <button type="button" class="btn btn-primary">Bayar</button>
+        <button type="button" class="btn btn-primary" href="{% url 'main:langganan' %}">Bayar</button>
     </div>
     </div>
 </div>

@@ -44,12 +44,12 @@
         <tbody>
         {% for paket_lain in list_paket_lain %}
             <tr>
-                <td class="border">{{ paket_lain.nama }}</td>
-                <td class="border">{{ paket_lain.harga }}</td>
-                <td class="border">{{ paket_lain.resolusi_layar }}</td>
-                <td class="border">{{ paket_lain.dukungan_perangkat }}</td>
+                <td class="border">{{ paket_lain.0 }}</td> 
+                <td class="border">{{ paket_lain.1 }}</td>
+                <td class="border">{{ paket_lain.2 }}</td>
+                <td class="border">{{ paket_lain.3 }}</td>
                 <td class="border">
-                    <a class="btn btn-primary" href="{% url 'main:halaman_beli' %}?nama={{paket_lain.nama}}" role="button">Beli</a>
+                    <a class="btn btn-primary" href="{% url 'main:halaman_beli' paket_lain.nama%}" role="button">Beli</a>
                 </td>
             </tr>
         {% endfor %}

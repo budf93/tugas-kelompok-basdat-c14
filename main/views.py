@@ -23,72 +23,76 @@ def loggedin_user(request):
     }
 
 def daftar_kontributor(request):
+    context = {
+        "kontributor_list": [],
+        "error": None}
     try:
         cursor = conn.cursor()
         query = """
-        (
         SELECT 
-            c.nama, 
-            'Penulis Skenario' AS tipe, 
-            c.jenis_kelamin, 
-            c.kewarganegaraan
-        FROM 
-            contributors c
-        JOIN 
-            penulis_skenario ps ON c.id = ps.id
-        )
-        UNION
-        (
-        SELECT 
-            c.nama, 
-            'Pemain' AS tipe, 
-            c.jenis_kelamin, 
-            c.kewarganegaraan
-        FROM 
-            contributors c
-        JOIN 
-            pemain p ON c.id = p.id
-        )
-        UNION
-        (
-        SELECT 
-            c.nama, 
-            'Sutradara' AS tipe, 
-            c.jenis_kelamin, 
-            c.kewarganegaraan
-        FROM 
-            contributors c
-        JOIN 
-            sutradara s ON c.id = s.id;
-        )
+            nama, 
+            string_agg(tipe, ', ') AS tipe, 
+            jenis_kelamin, 
+            kewarganegaraan
+        FROM (
+            SELECT 
+                c.nama, 
+                'Penulis Skenario' AS tipe, 
+                c.jenis_kelamin, 
+                c.kewarganegaraan
+            FROM 
+                contributors c
+            JOIN 
+                penulis_skenario ps ON c.id = ps.id
+            UNION
+            SELECT 
+                c.nama, 
+                'Pemain' AS tipe, 
+                c.jenis_kelamin, 
+                c.kewarganegaraan
+            FROM 
+                contributors c
+            JOIN 
+                pemain p ON c.id = p.id
+            UNION
+            SELECT 
+                c.nama, 
+                'Sutradara' AS tipe, 
+                c.jenis_kelamin, 
+                c.kewarganegaraan
+            FROM 
+                contributors c
+            JOIN 
+                sutradara s ON c.id = s.id
+        ) AS combined
+        GROUP BY 
+            nama, 
+            jenis_kelamin, 
+            kewarganegaraan;
         """
 
         cursor.execute(query)
         kontributor_output = cursor.fetchall()
 
-        kontributor_list = []
-
-        for res in kontributor_output:
-            kontributor_list.append({
-                "id": res[0],
-                "nama": res[1],
-                "tipe": res[2],
-                "jenis_kelamin": res[3],
-                "kewarganegaraan": res[4]         
-            })
-
-        #send all data to html through context 
         context = {
-            "kontributor_list" : kontributor_list,
+        'kontributor_list' : [{
+            "nama": res[0],
+            "tipe": res[1],
+            "jenis_kelamin": f'{"Laki-laki" if res[2] == 0 else "Perempuan"}',
+            "kewarganegaraan": res[3]
+        }
+        for res in kontributor_output],
         }
 
     except (Exception, psycopg2.Error) as error:
         print("Error while fetching data from PostgreSQL", error)
+        context["error"] = "Error while fetching data from PostgreSQL"
 
     finally:
         # closing database connection.
-        if conn:
+        if 'cursor' in locals():
             cursor.close()
+        if 'conn' in locals() and conn:
             conn.close()
             print("PostgreSQL connection is closed")
 
@@ -97,9 +101,10 @@ def daftar_kontributor(request):
 
 @require_http_methods(["GET","POST"])
 def langganan(request):
+    context = {}
     try:
         cursor = conn.cursor()
-        print(request.session.get('username'))
+        # print(request.session.get('username'))
         #todo
         query = f"""SELECT distinct
             paket.nama, 
@@ -152,40 +157,29 @@ def langganan(request):
         #todo
         query = f"""
         select 
-        nama, transaction.start_date_time, transaction.end_date_time, metode_pembayaran, timestamp_pembayaran, sum(harga)
+        nama, transaction.start_date_time, transaction.end_date_time, metode_pembayaran, timestamp_pembayaran, harga
         from paket 
         join transaction on paket.nama = transaction.nama_paket
-        join pengguna on transaction.username = {request.session.get('username')}
+        join pengguna on pengguna.username = '{request.session.get('username')}'
         group by nama, transaction.start_date_time, transaction.end_date_time, metode_pembayaran, timestamp_pembayaran;
         """
 
         cursor.execute(query)
         riwayat_transaksi_output = cursor.fetchall()
 
-        list_riwayat_transaksi = []
+        # list_riwayat_transaksi = []
 
-        for res in riwayat_transaksi_output:
-            list_riwayat_transaksi.append({     
-                "nama_paket": res[0],
-                "tanggal_dimulai": res[1],
-                "tanggal_akhir": res[2],
-                "metode_pembayaran": res[3],
-                "tanggal_pembayaran": res[4],
-                "total_pembayaran" : res[5]
-            })
+        # for res in riwayat_transaksi_output:
+        #     list_riwayat_transaksi.append({     
+        #         "nama_paket": res[0],
+        #         "tanggal_dimulai": res[1],
+        #         "tanggal_akhir": res[2],
+        #         "metode_pembayaran": res[3],
+        #         "tanggal_pembayaran": res[4],
+        #         "total_pembayaran" : res[5]
+        #     })
 
-        cursor.execute()
-
-        #send all data to html through context 
-        # context = {
-        #     'list_paket_langganan_aktif':list_paket_langganan_aktif,
-        #     'list_paket_lain':list_paket_lain,
-        #     'list_riwayat_transaksi':list_riwayat_transaksi
-        # }
-
-        # context = {
-        #     'list_paket_langganan_aktif' : list_paket_langganan_aktif
-        # }
+        # cursor.execute(query)
 
         context = {
         'list_paket_langganan_aktif' : [{
@@ -199,9 +193,9 @@ def langganan(request):
         for res in paket_langganan_output],
         'list_paket_lain' : [{
             "nama" : res[0],
-                "harga" : res[1],
-                "resolusi_layar": res[2],
-                "dukungan_perangkat": res[3]
+            "harga" : res[1],
+            "resolusi_layar": res[2],
+            "dukungan_perangkat": res[3]
         }
         for res in paket_lain_output],
         'list_riwayat_transaksi' : [{
@@ -214,7 +208,9 @@ def langganan(request):
         }
         for res in riwayat_transaksi_output],
         }
-        return render(request, "langganan.html", context)
+        
+        # print(context)
+        # return render(request, "langganan.html", context)
 
     except (Exception, psycopg2.Error) as error:
         print("Error while fetching data from PostgreSQL", error)
@@ -225,17 +221,18 @@ def langganan(request):
             cursor.close()
             conn.close()
             print("PostgreSQL connection is closed")
-        
-    # return redirect("main:halaman_beli")
+
+    return render(request, "langganan.html", context)
             
 
 @require_http_methods(["GET","POST"])
 def halaman_beli(request, paket):
+    paket_lain = []
     if request.session.get('username') is not None:
         try:          
             if request.method == "GET":
                 nama = request.GET.get('nama')
-                print(nama)
+                # print(nama)
             cursor = conn.cursor()
             if request.method == "POST":
                 package_name = paket
@@ -269,9 +266,10 @@ def halaman_beli(request, paket):
                     """
                     ) 
             else:
+                # print(paket)
                 cursor.execute(
                     f"""
-                    select p.nama, p.harga, p.resolusi_layar, string_agg(dukungan_perangkat) as perangkat
+                    select p.nama, p.harga, p.resolusi_layar, string_agg(dukungan_perangkat, ', ') as perangkat
                     from paket p join dukungan_perangkat d on p.nama=d.nama_paket
                     where p.nama='{paket}'
                     group by p.nama, p.harga, p.resolusi_layar
@@ -286,9 +284,11 @@ def halaman_beli(request, paket):
                     "dukungan_perangkat" : res[3],
                 }
                 for res in daftar_paket]
-                return render(request, 'main:langganan', {"paket_lain":paket_lain})
+                
+                # print(paket_lain[0]['resolusi_layar'])
+                print(paket_lain)
+                return render(request, 'halaman_beli.html', {'paket_lain':paket_lain})
             conn.commit()
-            return redirect('main:langganan')
 
         except (Exception, psycopg2.Error) as error:
             print("Error while fetching data from PostgreSQL", error)
@@ -302,7 +302,7 @@ def halaman_beli(request, paket):
     else:
         print(redirect('main:show_login'))
 
-    return redirect('main:show_trailer')
+    return render(request, 'langganan.html', {'paket_lain':paket_lain[0]})
 
 def show_home(request,context=None):
     print(context)
