@@ -20,11 +20,6 @@
       <a class="navbar-brand" style="color: aliceblue;" href="{% url 'main:show_home' %}">Home</a>
       <a class="navbar-brand" style="color: aliceblue;" href="{% url 'main:show_daftar_tayangan' %}">Daftar Trailer</a>
       <a class="navbar-brand" style="color: aliceblue;" href="{% url 'authentication:login' %}">Login</a>
-    {% else %}
-    <div>
-    <a class="navbar-brand" style="color: aliceblue;" href="{% url 'main:show_home' %}">Home</a>
-    <a class="navbar-brand" style="color: aliceblue;" href="{% url 'main:show_daftar_tayangan' %}">Daftar Trailer</a>
-    <a class="navbar-brand" style="color: aliceblue;" href="{% url 'authentication:login' %}">Login</a>
 
     {% endif %}
   
