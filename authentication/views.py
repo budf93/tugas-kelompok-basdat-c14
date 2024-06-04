@@ -50,7 +50,7 @@ def login(request, context=None):
             request.session["username"] = username
             request.session["logged_in"] = True
             
-            return redirect('main:show_home')
+            return redirect('main:show_daftar_tayangan')
             
     return render(request, 'login.html', context)
 

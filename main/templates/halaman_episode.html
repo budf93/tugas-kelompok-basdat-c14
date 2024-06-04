@@ -10,23 +10,75 @@
 <body>
 
     <h1>HALAMAN EPISODE</h1>
-    <h2>Judul: data</h2>
-    <h3>Sub Judul: data</h3>
+    <h2>Judul: {{ judul }}</h2>
+    <h3>Sub Judul: {{ sub_judul }}</h3>
     
-    <button>Tonton</button>
+    <!-- TODO -->
+    {% now "Y-m-d" as today %}
+    {% if today >= release_date_episode %}
+        <label for="progress">Progress:</label>
+        <button id="toggleButton">Tonton</button>
+        <input type="range" min="0" max="100" value="0" id="movieSlider">
+        <p id="sliderPosition">0 %</p>
+        <script>
+            var slider = document.getElementById("movieSlider");
+            var output = document.getElementById("sliderPosition");
+            slider.oninput = function() {
+                output.innerHTML = this.value + " %";
+            }
+        </script>
+    {% endif %}
 
     <h4>Episode Lainnya:</h2>
-    <ul>
-        <li><a href="{% url 'main:show_episode' %}">Episode 1</a></li>
-        <li><a href="{% url 'main:show_episode' %}">Episode 2</a></li>
-        <li><a href="{% url 'main:show_episode' %}">Episode 3</a></li>
-    </ul> 
+    {% if haveOtherEpisodes %}
+        <ul>
+        {% for e in other_episode %}
+        <!-- TODO GIVE LINKS -->
+            <li><a href="{% url 'main:show_episode' e.0 judul e.1 %}">{{ e.1 }}</a></li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <p>{{ other_episode }}</p>
+    {% endif %}
 
-    <p>Sinopsis Episode: data</p>
-    <p>Durasi Episode: data</p>
-    <p>URL Episode: data</p>
-    <p>Tanggal Rilis Episode: data</p>
+    <p>Sinopsis Episode: {{ sinopsis_episode }}</p>
+    <p>Durasi Episode: {{ durasi }}</p>
+    <p>URL Episode: {{ url_episode }}</p>
+    <p>Tanggal Rilis Episode: {{ release_date_episode }}</p>
 
 </body>
+
+<!-- TODO IMPLEMENT -->
+<script>
+    let isWatching = false;
+    let startSliderPosition = 0;
+    let startTime = null;
+
+    document.getElementById('toggleButton').addEventListener('click', function() {
+        const slider = document.getElementById('movieSlider');
+        const id_tayangan = "{{ id }}";  // Get id_tayangan from context
+        const sub_judul = "{{ sub_judul }}"
+        if (!isWatching) {
+            // Start watching
+            this.innerText = 'Stop';
+            startSliderPosition = slider.value;
+            startTime = new Date().toISOString().slice(0, 19).replace('T', ' ');  // Capture start time
+        } else {
+            // Stop watching
+            this.innerText = 'Tonton';
+            const endSliderPosition = slider.value;
+
+            // Call Django view with AJAX
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', '/compute_riwayat_nonton/', true);
+            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+            xhr.setRequestHeader('X-CSRFToken', "{{ csrf_token }}");  // Django CSRF token
+            xhr.send(`start=${startSliderPosition}&end=${endSliderPosition}&startTime=${startTime}&id_tayangan=${id_tayangan}&sub_judul=${sub_judul}`);
+
+            startTime = null;  // Reset start time
+        }
+        isWatching = !isWatching;
+    });
+</script>
 
 {% endblock content %}

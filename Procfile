@@ -1,0 +1,1 @@
+web: gunicorn tugas_kelompok_basdat_c14.wsgi --log-file -

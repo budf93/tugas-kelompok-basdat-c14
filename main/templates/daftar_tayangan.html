@@ -11,13 +11,15 @@
 <body>
     <div class="container">
         <h1>DAFTAR TAYANGAN</h1>
-        <input type="text" id="search" placeholder="Pencarian Tayangan berdasarkan judul" oninput="toggleTables()">
+        <!-- TODO search -->
+        <form action="{% url 'main:search_tayangan' %}" method="get">
+            <input type="text" id="search" name="title" placeholder="Pencarian Tayangan berdasarkan judul">
+            <input type="submit" value="Search">
+        </form>
         <div id="defaultTables">
             <h2>10 Tayangan Terbaik Minggu ini</h2>
             <input type="radio" id="global" name="top10" checked>
             <label for="global">Top 10 Global</label>
-            <input type="radio" id="userCountry" name="top10">
-            <label for="userCountry">Top 10 Negara Pengguna</label>
             <table>
                 <tr>
                     <th>Peringkat</th>
@@ -26,18 +28,20 @@
                     <th>URL Trailer</th>
                     <th>Tanggal Rilis Trailer</th>
                     <th>Total View 7 Hari Terakhir</th>
-                    <th>Tayangan</th>
+                    {% if displayTombol %}<th>Tayangan</th>{% endif %}
                 </tr>
                 <!-- Repeat this row for each item in the list -->
+                {% for show in top_shows %}
                 <tr>
-                    <td>1</td>
-                    <td>data</td>
-                    <td>data</td>
-                    <td>data</td>
-                    <td>data</td>
-                    <td>data</td>
-                    <td><a href="{% url 'main:show_tayangan' %}" class="btn">Lihat Tayangan</a></td>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ show.1 }}</td>
+                    <td>{{ show.2 }}</td>
+                    <td>{{ show.3 }}</td>
+                    <td>{{ show.4 }}</td>
+                    <td>{{ show.5 }}</td>
+                    {% if displayTombol %}<td><a href="{% url 'main:show_tayangan' show.0 %}" class="btn">Lihat Tayangan</a></td>{% endif %}
                 </tr>
+                {% endfor %}
             </table>
             <h2>Film</h2>
             <table>
@@ -46,16 +50,18 @@
                     <th>Sinopsis Trailer</th>
                     <th>URL Trailer</th>
                     <th>Tanggal Rilis Trailer</th>
-                    <th>Tayangan</th>
+                    {% if displayTombol %}<th>Tayangan</th>{% endif %}
                 </tr>
                 <!-- Repeat this row for each item in the list -->
+                {% for film in films %}
                 <tr>
-                    <td>data</td>
-                    <td>data</td>
-                    <td>data</td>
-                    <td>data</td>
-                    <td><a href="{% url 'main:show_tayangan' %}" class="btn">Lihat Tayangan</a></td>
+                    <td>{{ film.1 }}</td>
+                    <td>{{ film.2 }}</td>
+                    <td>{{ film.3 }}</td>
+                    <td>{{ film.4 }}</td>
+                    {% if displayTombol %}<td><a href="{% url 'main:show_tayangan' film.0 %}" class="btn">Lihat Tayangan</a></td>{% endif %}
                 </tr>
+                {% endfor %}
             </table>
             <h2>Series</h2>
             <!-- Repeat this section for each series -->
@@ -65,16 +71,18 @@
                     <th>Sinopsis Trailer</th>
                     <th>URL Trailer</th>
                     <th>Tanggal Rilis Trailer</th>
-                    <th>Tayangan</th>
+                    {% if displayTombol %}<th>Tayangan</th>{% endif %}
                 </tr>
                 <!-- Repeat this row for each item in the list -->
+                {% for serie in series %}
                 <tr>
-                    <td>data</td>
-                    <td>data</td>
-                    <td>data</td>
-                    <td>data</td>
-                    <td><a href="{% url 'main:show_tayangan' %}" class="btn">Lihat Tayangan</a></td>
+                    <td>{{ serie.1 }}</td>
+                    <td>{{ serie.2 }}</td>
+                    <td>{{ serie.3 }}</td>
+                    <td>{{ serie.4 }}</td>
+                    {% if displayTombol %}<td><a href="{% url 'main:show_tayangan' serie.0 %}" class="btn">Lihat Tayangan</a></td>{% endif %}
                 </tr>
+                {% endfor %}
             </table>
         </div>
         <div id="searchResults" style="display: none;">
@@ -94,7 +102,7 @@
                     <td>data</td>
                     <td>data</td>
                     <td>data</td>
-                    <td><a href="{% url 'main:show_tayangan' %}" class="btn">Lihat Tayangan</a></td>
+                    <td><a href="" class="btn">Lihat Tayangan</a></td>
                 </tr>
             </table>
         </div>
@@ -143,23 +151,5 @@
         cursor: pointer;
     }
 </style>
-
-<script>
-    function toggleTables() {
-        var searchBox = document.getElementById('search');
-        var defaultTables = document.getElementById('defaultTables');
-        var searchResults = document.getElementById('searchResults');
-
-        if (searchBox.value) {
-            // If the search box is not empty, hide the default tables and show the search results
-            defaultTables.style.display = 'none';
-            searchResults.style.display = 'block';
-        } else {
-            // If the search box is empty, show the default tables and hide the search results
-            defaultTables.style.display = 'block';
-            searchResults.style.display = 'none';
-        }
-    }
-</script>
 
 {% endblock content %}
